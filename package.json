@@ -1,0 +1,22 @@
+{
+  "name": "pomodoro-desktop",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/talhaguy/pomodoro-desktop.git"
+  },
+  "author": "Muhammad Talha",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/talhaguy/pomodoro-desktop/issues"
+  },
+  "homepage": "https://github.com/talhaguy/pomodoro-desktop#readme",
+  "devDependencies": {
+    "electron": "^11.1.0"
+  }
+}
