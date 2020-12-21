@@ -7,18 +7,6 @@
 
 import React from "react";
 import ReactDOM from "react-dom";
-import styled from "styled-components";
-
-const AppStyled = styled.div`
-    color: blue;
-`;
-
-function App() {
-    return (
-        <AppStyled>
-            <h1>App</h1>
-        </AppStyled>
-    );
-}
+import { App } from "./App";
 
 ReactDOM.render(<App />, document.getElementById("app"));
