@@ -1,7 +1,8 @@
-import React, { MutableRefObject, useEffect, useRef } from "react";
-import { connect, useDispatch, useSelector } from "react-redux";
-import styled, { createGlobalStyle } from "styled-components";
-import { increment, decrement } from "./counterSlice";
+import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { createGlobalStyle } from "styled-components";
+import { AppDispatch } from "./store";
+import { selectTimer, startTimerAsync, toggleTimer } from "./timerSlice";
 
 // Counter
 
@@ -26,13 +27,15 @@ export function useRenderProgressCircleInCanvas(
     canvasWidth: number,
     canvasHeight: number,
     circleWidth: number,
-    current: number,
     total: number
 ) {
     const canvasRef = useRef<HTMLCanvasElement>();
 
-    useEffect(() => {
-        const percentage = current / total;
+    // const dispatch = useDispatch<AppDispatch>();
+
+    const draw = (elapsedMs: number) => {
+        // console.log("draw");
+        const percentage = elapsedMs / total;
         const degrees = 360 * percentage;
         const degreesOffset = degrees - 90;
         const radians = degreesToRadians(degreesOffset);
@@ -85,29 +88,34 @@ export function useRenderProgressCircleInCanvas(
         context.fillStyle = "blue";
         context.fill();
         context.closePath();
-    });
+    };
 
-    return canvasRef;
+    useEffect(() => {
+        // dispatch(startTimerAsync(draw));
+        draw(0);
+    }, []);
+
+    return [canvasRef, draw] as [
+        MutableRefObject<HTMLCanvasElement>,
+        typeof draw
+    ];
 }
 
 export interface ProgressCircleProps {
-    current: number;
+    width: number;
+    height: number;
     total: number;
+    canvasRef: MutableRefObject<HTMLCanvasElement>;
 }
 
-export function ProgressCircle({ current, total }: ProgressCircleProps) {
-    const WIDTH = 300;
-    const HEIGHT = 300;
+export function ProgressCircle({
+    width,
+    height,
+    canvasRef,
+}: ProgressCircleProps) {
+    console.log("ProgressCircle");
 
-    const canvasRef = useRenderProgressCircleInCanvas(
-        WIDTH,
-        HEIGHT,
-        WIDTH - 10,
-        current,
-        total
-    );
-
-    return <canvas ref={canvasRef} width={WIDTH} height={HEIGHT} />;
+    return <canvas ref={canvasRef} width={width} height={height} />;
 }
 
 export interface TimeProps {
@@ -118,7 +126,6 @@ function Time({ ms }: TimeProps) {
     return (
         <div>
             <div>{ms}</div>
-            <ProgressCircle current={ms} total={25 * 60 * 1000} />
         </div>
     );
 }
@@ -132,15 +139,62 @@ const GlobalStyle = createGlobalStyle`
 `;
 
 export function App() {
-    const count = useSelector<{ counter: { value: number } }, number>(
-        (state) => state.counter.value
+    console.log("DEBUG: render App");
+
+    const timerState = useSelector(selectTimer);
+    const dispatch = useDispatch<AppDispatch>();
+
+    const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+    const timerMsStoppedAt = useRef<number>(timerState.time);
+
+    // const TOTAL = 25 * 60 * 1000;
+    const TOTAL = 10000;
+    // const TOTAL = 5 * 60 * 1000;
+
+    const WIDTH = 300;
+    const HEIGHT = 300;
+
+    const [canvasRef, draw] = useRenderProgressCircleInCanvas(
+        WIDTH,
+        HEIGHT,
+        WIDTH - 10,
+        TOTAL
     );
-    const dispatch = useDispatch();
+
+    const toggleTimerClick = () => {
+        console.log("toggle", timerIdRef.current);
+        // if (timerIdRef.current) {
+        //     timerIdRef.current = dispatch(pauseTimerAsync(timerIdRef.current));
+        // } else {
+        //     timerIdRef.current = dispatch(startTimerAsync());
+        // }
+
+        // dispatch(startTimerAsync());
+
+        if (timerState.active) {
+            dispatch(toggleTimer(draw, timerMsStoppedAt.current, TOTAL));
+        } else {
+            dispatch(toggleTimer(draw, timerMsStoppedAt.current, TOTAL)).then(
+                (endTimeMs) => {
+                    console.log("timer has stopped!!!", endTimeMs);
+                    timerMsStoppedAt.current = endTimeMs;
+                }
+            );
+        }
+    };
 
     return (
         <>
             <GlobalStyle />
-            <Time ms={(25 * 60 * 1000) / 2} />
+            <span>active? {timerState.active.toString()}</span>
+            <Time ms={timerState.time} />
+            <ProgressCircle
+                width={WIDTH}
+                height={HEIGHT}
+                total={TOTAL}
+                canvasRef={canvasRef}
+            />
+            <button onClick={toggleTimerClick}>Toggle</button>
         </>
     );
 }
