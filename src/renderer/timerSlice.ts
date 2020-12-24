@@ -27,10 +27,23 @@ export const timerSlice = createSlice({
         setActivate: (state, action: PayloadAction<{ active: boolean }>) => {
             state.active = action.payload.active;
         },
+
+        deactivateTimer: (state) => {
+            // set the state to deactivated
+            // this alone does not stop the timer
+            // the `animationCB` in `startTimerAndAnimation` will check for the active state
+            // to determine whether to stop or not
+            state.active = false;
+        },
     },
 });
 
-export const { increment, setTime, setActivate } = timerSlice.actions;
+export const {
+    increment,
+    setTime,
+    setActivate,
+    deactivateTimer,
+} = timerSlice.actions;
 
 export const activateTimer = (
     draw: (elapsedMs: number) => void,
@@ -41,60 +54,51 @@ export const activateTimer = (
     return dispatch(startTimerAndAnimation(draw, timerStartedFrom, total));
 };
 
-export const deactivateTimer = () => (dispatch: AppDispatch) => {
-    dispatch(setActivate({ active: false }));
-};
-
 export const startTimerAndAnimation = (
     draw: (elapsedMs: number) => void,
     timerStartedFrom: number,
     total: number
 ) => (dispatch: AppDispatch, getState: () => RootState) => {
-    console.log("startTimeAsync");
-
+    // return a promise which resolves with the timer's elapsed time in ms when the timer ends
+    // the elapsed time is meant to be stored in the component using this action
+    // when calling this action again, it should be passed in as `timerStartedFrom`
     return new Promise<number>((res, rej) => {
         let startTime: number = null;
 
         const animationCb = (time: number) => {
-            // console.log("animation...", time);
-
             const state = getState();
 
             if (!startTime) {
                 startTime = time;
-                console.log("starttime...", startTime);
             }
 
+            // draw the animation for elapsed time
+            // `time - startTime` is the elapsed time
+            // elapsed time + `timerStartedFrom` takes into account the previously elapsed time of the timer
             draw(time - startTime + timerStartedFrom);
-            console.log("draw at ", time - startTime + timerStartedFrom);
 
+            // if a second has passed since the last time in state, increment the time in state
             if (
                 time - startTime + timerStartedFrom >=
                 state.timer.time + 1000
             ) {
-                console.log(
-                    "second...",
-                    time,
-                    startTime,
-                    state.timer.time + 1000
-                );
-                console.log("before inc", state.timer.time);
                 dispatch(increment());
-                console.log("after inc", state.timer.time);
             }
 
+            // deactivate the timer and reset the time when timer completes
             if (state.timer.time >= total) {
-                console.log("time is " + (state.timer.time + 1000));
                 dispatch(setActivate({ active: false }));
                 dispatch(setTime({ time: 0 }));
+                // resolve `0` b/c timer is reset
                 res(0);
             } else {
-                // TODO: move to top?
+                // as long as the timer is still active, rerun the callback. otherwise, deactivate it.
+                // deactivation is triggered by the `deactivateTimer` action
                 if (state.timer.active) {
                     requestAnimationFrame(animationCb);
                 } else {
-                    console.log("timer not active any more...");
                     dispatch(setActivate({ active: false }));
+                    // resolve the amount of elapsed time for the timer
                     res(time - startTime + timerStartedFrom);
                 }
             }
@@ -104,27 +108,4 @@ export const startTimerAndAnimation = (
     });
 };
 
-// export const pauseTimerAsync = (timerId: NodeJS.Timeout) => (
-//     dispatch: AppDispatch
-// ): null => {
-//     clearInterval(timerId);
-//     dispatch(pause());
-//     return null;
-// };
-// export const pauseTimerAsync = createAsyncThunk<
-//     null,
-//     number,
-//     {
-//         dispatch: AppDispatch;
-//     }
-// >("pauseTimer", async (timerId, thunkAPI) => {
-//     console.log("pausetimer", timerId);
-//     clearInterval(timerId);
-//     thunkAPI.dispatch(pause());
-//     return null;
-// });
-
-// The function below is called a selector and allows us to select a value from
-// the state. Selectors can also be defined inline where they're used instead of
-// in the slice file. For example: `useSelector((state) => state.counter.value)`
 export const selectTimer = (state: RootState) => state.timer;

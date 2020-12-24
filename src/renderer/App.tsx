@@ -29,14 +29,16 @@ export function useRenderProgressCircleInCanvas(
     circleWidth: number,
     total: number
 ) {
+    console.log("useRenderProgressCircleInCanvas");
     const canvasRef = useRef<HTMLCanvasElement>();
 
-    const draw = (elapsedMs: number) => {
+    const draw = useCallback((elapsedMs: number) => {
         const percentage = elapsedMs / total;
         const degrees = 360 * percentage;
         const degreesOffset = degrees - 90;
         const radians = degreesToRadians(degreesOffset);
 
+        // make 2x bigger for higher device pixel ratio
         const canvasWidth2x = canvasWidth * 2;
         const canvasHeight2x = canvasHeight * 2;
         const circleWidth2x = circleWidth * 2;
@@ -44,7 +46,7 @@ export function useRenderProgressCircleInCanvas(
         const context = canvasRef.current.getContext("2d");
         context.clearRect(0, 0, canvasWidth2x, canvasHeight2x);
 
-        // render circle
+        // render full outline circle
         context.beginPath();
         context.arc(
             canvasWidth2x / 2,
@@ -58,7 +60,7 @@ export function useRenderProgressCircleInCanvas(
         context.stroke();
         context.closePath();
 
-        // render progress
+        // render progress arc
         context.beginPath();
         context.arc(
             canvasWidth2x / 2,
@@ -72,7 +74,7 @@ export function useRenderProgressCircleInCanvas(
         context.stroke();
         context.closePath();
 
-        // render nib
+        // render nib for progress arc
         const nibCoords = calcCoordsForPointOnCirclePerimeter(
             [canvasWidth2x / 2, canvasHeight2x / 2],
             circleWidth2x / 2,
@@ -89,8 +91,9 @@ export function useRenderProgressCircleInCanvas(
         context.fillStyle = "blue";
         context.fill();
         context.closePath();
-    };
+    }, []);
 
+    // draw initial progress
     useEffect(() => {
         draw(0);
     }, []);
@@ -151,7 +154,8 @@ export function App() {
     const timerState = useSelector(selectTimer);
     const dispatch = useDispatch<AppDispatch>();
 
-    const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+    // store accurate no. of ms timer stopped at (as state only stores to the second).
+    // important for progress arc to start at right location and not "jump" to the nearest second.
     const timerMsStoppedAt = useRef<number>(timerState.time);
 
     // const TOTAL = 25 * 60 * 1000;
@@ -169,7 +173,6 @@ export function App() {
     );
 
     const toggleTimerClick = () => {
-        console.log("toggle", timerIdRef.current);
         if (timerState.active) {
             dispatch(deactivateTimer());
         } else {
@@ -185,7 +188,6 @@ export function App() {
     return (
         <>
             <GlobalStyle />
-            <span>active? {timerState.active.toString()}</span>
             <Time ms={timerState.time} />
             <ProgressCircle
                 width={WIDTH}
