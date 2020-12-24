@@ -2,7 +2,7 @@ import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { createGlobalStyle } from "styled-components";
 import { AppDispatch } from "./store";
-import { selectTimer, startTimerAsync, toggleTimer } from "./timerSlice";
+import { selectTimer, activateTimer, deactivateTimer } from "./timerSlice";
 
 // Counter
 
@@ -31,10 +31,7 @@ export function useRenderProgressCircleInCanvas(
 ) {
     const canvasRef = useRef<HTMLCanvasElement>();
 
-    // const dispatch = useDispatch<AppDispatch>();
-
     const draw = (elapsedMs: number) => {
-        // console.log("draw");
         const percentage = elapsedMs / total;
         const degrees = 360 * percentage;
         const degreesOffset = degrees - 90;
@@ -95,7 +92,6 @@ export function useRenderProgressCircleInCanvas(
     };
 
     useEffect(() => {
-        // dispatch(startTimerAsync(draw));
         draw(0);
     }, []);
 
@@ -159,8 +155,8 @@ export function App() {
     const timerMsStoppedAt = useRef<number>(timerState.time);
 
     // const TOTAL = 25 * 60 * 1000;
-    const TOTAL = 10000;
     // const TOTAL = 5 * 60 * 1000;
+    const TOTAL = 10000;
 
     const WIDTH = 240;
     const HEIGHT = 240;
@@ -174,18 +170,10 @@ export function App() {
 
     const toggleTimerClick = () => {
         console.log("toggle", timerIdRef.current);
-        // if (timerIdRef.current) {
-        //     timerIdRef.current = dispatch(pauseTimerAsync(timerIdRef.current));
-        // } else {
-        //     timerIdRef.current = dispatch(startTimerAsync());
-        // }
-
-        // dispatch(startTimerAsync());
-
         if (timerState.active) {
-            dispatch(toggleTimer(draw, timerMsStoppedAt.current, TOTAL));
+            dispatch(deactivateTimer());
         } else {
-            dispatch(toggleTimer(draw, timerMsStoppedAt.current, TOTAL)).then(
+            dispatch(activateTimer(draw, timerMsStoppedAt.current, TOTAL)).then(
                 (endTimeMs) => {
                     console.log("timer has stopped!!!", endTimeMs);
                     timerMsStoppedAt.current = endTimeMs;

@@ -17,10 +17,6 @@ export const timerSlice = createSlice({
     initialState,
     reducers: {
         increment: (state) => {
-            // Redux Toolkit allows us to write "mutating" logic in reducers. It
-            // doesn't actually mutate the state because it uses the Immer library,
-            // which detects changes to a "draft state" and produces a brand new
-            // immutable state based on those changes
             state.time += 1000;
         },
 
@@ -36,54 +32,28 @@ export const timerSlice = createSlice({
 
 export const { increment, setTime, setActivate } = timerSlice.actions;
 
-export const toggleTimer = (
+export const activateTimer = (
     draw: (elapsedMs: number) => void,
     timerStartedFrom: number,
     total: number
-) => (dispatch: AppDispatch, getState: () => RootState) => {
-    if (getState().timer.active) {
-        dispatch(setActivate({ active: false }));
-        return Promise.resolve(null);
-    } else {
-        dispatch(setActivate({ active: true }));
-        return dispatch(startTimerAsync(draw, timerStartedFrom, total));
-    }
+) => (dispatch: AppDispatch) => {
+    dispatch(setActivate({ active: true }));
+    return dispatch(startTimerAndAnimation(draw, timerStartedFrom, total));
 };
 
-// The function below is called a thunk and allows us to perform async logic. It
-// can be dispatched like a regular action: `dispatch(incrementAsync(10))`. This
-// will call the thunk with the `dispatch` function as the first argument. Async
-// code can then be executed and other actions can be dispatched
-// export const startTimerAsync = createAsyncThunk<
-//     Promise<NodeJS.Timeout>,
-//     undefined,
-//     { dispatch: AppDispatch }
-// >("startTimer", async (_, thunkAPI) => {
-//     const id = setInterval(() => {
-//         thunkAPI.dispatch(increment());
-//     }, 1000);
-//     return id;
-// });
-// export const startTimerAsync = () => (dispatch: AppDispatch) => {
-//     const id = setInterval(() => {
-//         dispatch(increment());
-//     }, 1000);
-//     return id;
-// };
-export const startTimerAsync = (
+export const deactivateTimer = () => (dispatch: AppDispatch) => {
+    dispatch(setActivate({ active: false }));
+};
+
+export const startTimerAndAnimation = (
     draw: (elapsedMs: number) => void,
     timerStartedFrom: number,
     total: number
 ) => (dispatch: AppDispatch, getState: () => RootState) => {
     console.log("startTimeAsync");
-    // const id = setInterval(() => {
-    //     dispatch(increment());
-    // }, 1000);
-    // return id;
 
-    return new Promise((res, rej) => {
+    return new Promise<number>((res, rej) => {
         let startTime: number = null;
-        // let timerStartedFrom: number = getState().timer.time;
 
         const animationCb = (time: number) => {
             // console.log("animation...", time);
