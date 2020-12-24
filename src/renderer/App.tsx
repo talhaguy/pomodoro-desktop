@@ -1,9 +1,13 @@
 import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
+import { Button } from "./Button";
+import { Controls } from "./Controls";
+import { GlobalStyle } from "./GlobalStyle";
 import { AppDispatch } from "./store";
 import { THEME } from "./theme";
 import { formatMsToMin } from "./time";
+import { Timer } from "./Timer";
 import { selectTimer, activateTimer, deactivateTimer } from "./timerSlice";
 
 // Counter
@@ -108,56 +112,7 @@ export function useRenderProgressCircleInCanvas(
     ];
 }
 
-export interface ProgressCircleProps {
-    width: number;
-    height: number;
-    total: number;
-    canvasRef: MutableRefObject<HTMLCanvasElement>;
-}
-
-export function ProgressCircle({
-    width,
-    height,
-    canvasRef,
-}: ProgressCircleProps) {
-    console.log("ProgressCircle");
-
-    return (
-        <canvas
-            ref={canvasRef}
-            width={width * 2}
-            height={height * 2}
-            style={{ width, height }}
-        />
-    );
-}
-
-const StyledTime = styled.div`
-    font-size: 7.2rem;
-`;
-
-export interface TimeProps {
-    ms: number;
-}
-
-function Time({ ms }: TimeProps) {
-    return <StyledTime>{formatMsToMin(ms)}</StyledTime>;
-}
-
 // App
-
-const GlobalStyle = createGlobalStyle`
-    html {
-        font-size: 62.5%;
-        font-family: ${(props) => props.theme.FONTS.PRIMARY};
-        color: ${(props) => props.theme.COLORS.WHITE};
-    }
-
-    body {
-        margin: 0;
-        background-color: ${(props) => props.theme.COLORS.BLUE};
-    }
-`;
 
 const AppScreenMainContents = styled.main`
     height: 100vh;
@@ -165,25 +120,6 @@ const AppScreenMainContents = styled.main`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-`;
-
-const TimerProgressContainer = styled.div`
-    position: relative;
-    display: inline-block;
-
-    .timer {
-        z-index: 2;
-        position: absolute;
-        display: flex;
-        width: 100%;
-        height: 100%;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .progress {
-        z-index: 1;
-    }
 `;
 
 export function App() {
@@ -210,7 +146,7 @@ export function App() {
         TOTAL
     );
 
-    const toggleTimerClick = () => {
+    const toggleTimer = () => {
         if (timerState.active) {
             dispatch(deactivateTimer());
         } else {
@@ -226,21 +162,20 @@ export function App() {
     return (
         <>
             <GlobalStyle />
+
             <AppScreenMainContents>
-                <TimerProgressContainer>
-                    <div className="timer">
-                        <Time ms={timerState.time} />
-                    </div>
-                    <div className="progress">
-                        <ProgressCircle
-                            width={WIDTH}
-                            height={HEIGHT}
-                            total={TOTAL}
-                            canvasRef={canvasRef}
-                        />
-                    </div>
-                </TimerProgressContainer>
-                <button onClick={toggleTimerClick}>Toggle</button>
+                <Timer
+                    timeInMS={timerState.time}
+                    progressWidth={WIDTH}
+                    progressHeight={HEIGHT}
+                    maxMSInInterval={TOTAL}
+                    canvasRef={canvasRef}
+                />
+
+                <Controls
+                    toggleTimer={toggleTimer}
+                    isActive={timerState.active}
+                />
             </AppScreenMainContents>
         </>
     );
