@@ -100,8 +100,11 @@ export const startTimerAndAnimation = (
             if (getState().timer.time >= total) {
                 dispatch(deactivateTimer());
                 dispatch(setTime({ time: 0 }));
+                // reset the progress animation
+                draw(0);
                 // resolve `0` b/c timer is reset
                 res(0);
+                return;
             }
         };
 
