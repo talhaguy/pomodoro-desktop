@@ -1,7 +1,8 @@
 import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { createGlobalStyle } from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { AppDispatch } from "./store";
+import { THEME } from "./theme";
 import { selectTimer, activateTimer, deactivateTimer } from "./timerSlice";
 
 // Counter
@@ -47,6 +48,7 @@ export function useRenderProgressCircleInCanvas(
         context.clearRect(0, 0, canvasWidth2x, canvasHeight2x);
 
         // render full outline circle
+        context.globalAlpha = 0.2;
         context.beginPath();
         context.arc(
             canvasWidth2x / 2,
@@ -55,10 +57,11 @@ export function useRenderProgressCircleInCanvas(
             degreesToRadians(0),
             degreesToRadians(360)
         );
-        context.strokeStyle = "lightblue";
+        context.strokeStyle = THEME.COLORS.WHITE;
         context.lineWidth = 2 * 2;
         context.stroke();
         context.closePath();
+        context.globalAlpha = 1;
 
         // render progress arc
         context.beginPath();
@@ -69,7 +72,7 @@ export function useRenderProgressCircleInCanvas(
             degreesToRadians(-90),
             radians
         );
-        context.strokeStyle = "blue";
+        context.strokeStyle = THEME.COLORS.WHITE;
         context.lineWidth = 2 * 2;
         context.stroke();
         context.closePath();
@@ -88,7 +91,7 @@ export function useRenderProgressCircleInCanvas(
             degreesToRadians(0),
             degreesToRadians(360)
         );
-        context.fillStyle = "blue";
+        context.fillStyle = THEME.COLORS.WHITE;
         context.fill();
         context.closePath();
     }, []);
@@ -128,23 +131,49 @@ export function ProgressCircle({
     );
 }
 
+const StyledTime = styled.div`
+    font-size: 7.2rem;
+`;
+
 export interface TimeProps {
     ms: number;
 }
 
 function Time({ ms }: TimeProps) {
-    return (
-        <div>
-            <div>{ms}</div>
-        </div>
-    );
+    return <StyledTime>{ms}</StyledTime>;
 }
 
 // App
 
 const GlobalStyle = createGlobalStyle`
+    html {
+        font-size: 62.5%;
+        font-family: ${(props) => props.theme.FONTS.PRIMARY};
+        color: ${(props) => props.theme.COLORS.WHITE};
+    }
+
     body {
-        background-color: white;
+        margin: 0;
+        background-color: ${(props) => props.theme.COLORS.BLUE};
+    }
+`;
+
+const TimerProgressContainer = styled.div`
+    position: relative;
+    display: inline-block;
+
+    .timer {
+        z-index: 2;
+        position: absolute;
+        display: flex;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .progress {
+        z-index: 1;
     }
 `;
 
@@ -188,13 +217,19 @@ export function App() {
     return (
         <>
             <GlobalStyle />
-            <Time ms={timerState.time} />
-            <ProgressCircle
-                width={WIDTH}
-                height={HEIGHT}
-                total={TOTAL}
-                canvasRef={canvasRef}
-            />
+            <TimerProgressContainer>
+                <div className="timer">
+                    <Time ms={timerState.time} />
+                </div>
+                <div className="progress">
+                    <ProgressCircle
+                        width={WIDTH}
+                        height={HEIGHT}
+                        total={TOTAL}
+                        canvasRef={canvasRef}
+                    />
+                </div>
+            </TimerProgressContainer>
             <button onClick={toggleTimerClick}>Toggle</button>
         </>
     );

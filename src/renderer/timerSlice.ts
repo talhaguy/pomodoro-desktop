@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { MutableRefObject } from "react";
 import { AppDispatch, RootState } from "./store";
 
 export interface TimerState {
