@@ -40,48 +40,52 @@ export function useRenderProgressCircleInCanvas(
         const degreesOffset = degrees - 90;
         const radians = degreesToRadians(degreesOffset);
 
+        const canvasWidth2x = canvasWidth * 2;
+        const canvasHeight2x = canvasHeight * 2;
+        const circleWidth2x = circleWidth * 2;
+
         const context = canvasRef.current.getContext("2d");
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(0, 0, canvasWidth2x, canvasHeight2x);
 
         // render circle
         context.beginPath();
         context.arc(
-            canvasWidth / 2,
-            canvasHeight / 2,
-            circleWidth / 2,
+            canvasWidth2x / 2,
+            canvasHeight2x / 2,
+            circleWidth2x / 2,
             degreesToRadians(0),
             degreesToRadians(360)
         );
         context.strokeStyle = "lightblue";
-        context.lineWidth = 2;
+        context.lineWidth = 2 * 2;
         context.stroke();
         context.closePath();
 
         // render progress
         context.beginPath();
         context.arc(
-            canvasWidth / 2,
-            canvasHeight / 2,
-            circleWidth / 2,
+            canvasWidth2x / 2,
+            canvasHeight2x / 2,
+            circleWidth2x / 2,
             degreesToRadians(-90),
             radians
         );
         context.strokeStyle = "blue";
-        context.lineWidth = 2;
+        context.lineWidth = 2 * 2;
         context.stroke();
         context.closePath();
 
         // render nib
         const nibCoords = calcCoordsForPointOnCirclePerimeter(
-            [canvasWidth / 2, canvasHeight / 2],
-            circleWidth / 2,
+            [canvasWidth2x / 2, canvasHeight2x / 2],
+            circleWidth2x / 2,
             degreesOffset
         );
         context.beginPath();
         context.arc(
             nibCoords[0],
             nibCoords[1],
-            4,
+            4 * 2,
             degreesToRadians(0),
             degreesToRadians(360)
         );
@@ -115,7 +119,14 @@ export function ProgressCircle({
 }: ProgressCircleProps) {
     console.log("ProgressCircle");
 
-    return <canvas ref={canvasRef} width={width} height={height} />;
+    return (
+        <canvas
+            ref={canvasRef}
+            width={width * 2}
+            height={height * 2}
+            style={{ width, height }}
+        />
+    );
 }
 
 export interface TimeProps {
@@ -151,8 +162,8 @@ export function App() {
     const TOTAL = 10000;
     // const TOTAL = 5 * 60 * 1000;
 
-    const WIDTH = 300;
-    const HEIGHT = 300;
+    const WIDTH = 240;
+    const HEIGHT = 240;
 
     const [canvasRef, draw] = useRenderProgressCircleInCanvas(
         WIDTH,
