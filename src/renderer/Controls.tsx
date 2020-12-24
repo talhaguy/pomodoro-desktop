@@ -14,7 +14,7 @@ export const Controls: React.FC<ControlsProps> = ({
         <div>
             <ControlButton
                 type={
-                    isActive ? ControlButtonType.Play : ControlButtonType.Pause
+                    isActive ? ControlButtonType.Pause : ControlButtonType.Play
                 }
                 onClick={toggleTimer}
             />

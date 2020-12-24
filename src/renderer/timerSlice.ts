@@ -1,14 +1,23 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { batch } from "react-redux";
+import {
+    IntervalType,
+    NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK,
+} from "./interval";
 import { AppDispatch, RootState } from "./store";
 
 export interface TimerState {
     time: number;
     active: boolean;
+    intervalType: IntervalType;
+    numFocusIntervalsCompleted: number;
 }
 
 const initialState: TimerState = {
     time: 0,
     active: false,
+    intervalType: IntervalType.Focus,
+    numFocusIntervalsCompleted: 0,
 };
 
 export const timerSlice = createSlice({
@@ -34,14 +43,51 @@ export const timerSlice = createSlice({
             // to determine whether to stop or not
             state.active = false;
         },
+
+        nextInterval: (state) => {
+            switch (state.intervalType) {
+                case IntervalType.Focus:
+                    state.numFocusIntervalsCompleted += 1;
+
+                    if (
+                        state.numFocusIntervalsCompleted %
+                            NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK ===
+                        0
+                    ) {
+                        state.intervalType = IntervalType.LongBreak;
+                    } else {
+                        state.intervalType = IntervalType.ShortBreak;
+                    }
+                    break;
+
+                case IntervalType.ShortBreak:
+                case IntervalType.LongBreak:
+                    state.intervalType = IntervalType.Focus;
+                    break;
+            }
+        },
     },
 });
+
+// the redux `batch` does not return any value
+// this function wraps the original `batch` function so that any promise returned from
+// a dispatched action can be accessed
+export function batchPromise<T>(cb: () => Promise<T>) {
+    return new Promise<T>((res, rej) => {
+        batch(() => {
+            cb()
+                .then((data) => res(data))
+                .catch((err) => rej(err));
+        });
+    });
+}
 
 export const {
     increment,
     setTime,
     setActivate,
     deactivateTimer,
+    nextInterval,
 } = timerSlice.actions;
 
 export const activateTimer = (
@@ -49,8 +95,10 @@ export const activateTimer = (
     timerStartedFrom: number,
     total: number
 ) => (dispatch: AppDispatch) => {
-    dispatch(setActivate({ active: true }));
-    return dispatch(startTimerAndAnimation(draw, timerStartedFrom, total));
+    return batchPromise(() => {
+        dispatch(setActivate({ active: true }));
+        return dispatch(startTimerAndAnimation(draw, timerStartedFrom, total));
+    });
 };
 
 export const startTimerAndAnimation = (
@@ -98,8 +146,11 @@ export const startTimerAndAnimation = (
             // deactivate the timer and reset the time when timer completes
             // use `getState()` to get the latest state
             if (getState().timer.time >= total) {
-                dispatch(deactivateTimer());
-                dispatch(setTime({ time: 0 }));
+                batch(() => {
+                    dispatch(deactivateTimer());
+                    dispatch(setTime({ time: 0 }));
+                    dispatch(nextInterval());
+                });
                 // reset the progress animation
                 draw(0);
                 // resolve `0` b/c timer is reset

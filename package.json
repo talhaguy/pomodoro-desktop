@@ -10,6 +10,7 @@
         "build": "npm run build:renderer && npm run build:preload && npm run build:main",
         "watch:renderer": "parcel ./src/index.html --no-hmr --public-url ./",
         "start": "electron ./dist/main.js",
+        "start:dev": "ENV=dev electron ./dist/main.js",
         "test": "jest"
     },
     "repository": {

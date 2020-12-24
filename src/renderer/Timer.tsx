@@ -1,6 +1,7 @@
 import React, { MutableRefObject } from "react";
 import styled from "styled-components";
 import { Clock } from "./Clock";
+import { IntervalType } from "./interval";
 import { ProgressCircle } from "./ProgressCircle";
 
 const TimerProgressContainer = styled.div`
@@ -12,10 +13,19 @@ const TimerProgressContainer = styled.div`
         z-index: 2;
         position: absolute;
         display: flex;
+        flex-direction: column;
         width: 100%;
         height: 100%;
         align-items: center;
         justify-content: center;
+    }
+
+    .current-interval {
+        font-size: 1.8rem;
+        text-transform: uppercase;
+        position: absolute;
+        bottom: 45px;
+        text-align: center;
     }
 
     .progress {
@@ -29,6 +39,7 @@ interface TimerProps {
     progressHeight: number;
     maxMSInInterval: number;
     canvasRef: MutableRefObject<HTMLCanvasElement>;
+    currentIntervalType: IntervalType;
 }
 
 export const Timer: React.FC<TimerProps> = ({
@@ -37,11 +48,26 @@ export const Timer: React.FC<TimerProps> = ({
     progressHeight,
     maxMSInInterval,
     canvasRef,
+    currentIntervalType,
 }) => {
+    let intervalLabel: String;
+    switch (currentIntervalType) {
+        case IntervalType.Focus:
+            intervalLabel = "Focus";
+            break;
+        case IntervalType.ShortBreak:
+            intervalLabel = "Short Break";
+            break;
+        case IntervalType.LongBreak:
+            intervalLabel = "Long Break";
+            break;
+    }
+
     return (
         <TimerProgressContainer>
             <div className="timer">
                 <Clock ms={timeInMS} />
+                <span className="current-interval">{intervalLabel}</span>
             </div>
             <div className="progress">
                 <ProgressCircle

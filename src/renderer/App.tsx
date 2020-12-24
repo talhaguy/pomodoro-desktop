@@ -4,6 +4,7 @@ import styled, { createGlobalStyle } from "styled-components";
 import { Button } from "./Button";
 import { Controls } from "./Controls";
 import { GlobalStyle } from "./GlobalStyle";
+import { IntervalType, INTERVAL_LENGTH } from "./interval";
 import { AppDispatch } from "./store";
 import { THEME } from "./theme";
 import { formatMsToMin } from "./time";
@@ -38,68 +39,71 @@ export function useRenderProgressCircleInCanvas(
     console.log("useRenderProgressCircleInCanvas");
     const canvasRef = useRef<HTMLCanvasElement>();
 
-    const draw = useCallback((elapsedMs: number) => {
-        const percentage = elapsedMs / total;
-        const degrees = 360 * percentage;
-        const degreesOffset = degrees - 90;
-        const radians = degreesToRadians(degreesOffset);
+    const draw = useCallback(
+        (elapsedMs: number) => {
+            const percentage = elapsedMs / total;
+            const degrees = 360 * percentage;
+            const degreesOffset = degrees - 90;
+            const radians = degreesToRadians(degreesOffset);
 
-        // make 2x bigger for higher device pixel ratio
-        const canvasWidth2x = canvasWidth * 2;
-        const canvasHeight2x = canvasHeight * 2;
-        const circleWidth2x = circleWidth * 2;
+            // make 2x bigger for higher device pixel ratio
+            const canvasWidth2x = canvasWidth * 2;
+            const canvasHeight2x = canvasHeight * 2;
+            const circleWidth2x = circleWidth * 2;
 
-        const context = canvasRef.current.getContext("2d");
-        context.clearRect(0, 0, canvasWidth2x, canvasHeight2x);
+            const context = canvasRef.current.getContext("2d");
+            context.clearRect(0, 0, canvasWidth2x, canvasHeight2x);
 
-        // render full outline circle
-        context.globalAlpha = 0.2;
-        context.beginPath();
-        context.arc(
-            canvasWidth2x / 2,
-            canvasHeight2x / 2,
-            circleWidth2x / 2,
-            degreesToRadians(0),
-            degreesToRadians(360)
-        );
-        context.strokeStyle = THEME.COLORS.WHITE;
-        context.lineWidth = 2 * 2;
-        context.stroke();
-        context.closePath();
-        context.globalAlpha = 1;
+            // render full outline circle
+            context.globalAlpha = 0.2;
+            context.beginPath();
+            context.arc(
+                canvasWidth2x / 2,
+                canvasHeight2x / 2,
+                circleWidth2x / 2,
+                degreesToRadians(0),
+                degreesToRadians(360)
+            );
+            context.strokeStyle = THEME.COLORS.WHITE;
+            context.lineWidth = 2 * 2;
+            context.stroke();
+            context.closePath();
+            context.globalAlpha = 1;
 
-        // render progress arc
-        context.beginPath();
-        context.arc(
-            canvasWidth2x / 2,
-            canvasHeight2x / 2,
-            circleWidth2x / 2,
-            degreesToRadians(-90),
-            radians
-        );
-        context.strokeStyle = THEME.COLORS.WHITE;
-        context.lineWidth = 2 * 2;
-        context.stroke();
-        context.closePath();
+            // render progress arc
+            context.beginPath();
+            context.arc(
+                canvasWidth2x / 2,
+                canvasHeight2x / 2,
+                circleWidth2x / 2,
+                degreesToRadians(-90),
+                radians
+            );
+            context.strokeStyle = THEME.COLORS.WHITE;
+            context.lineWidth = 2 * 2;
+            context.stroke();
+            context.closePath();
 
-        // render nib for progress arc
-        const nibCoords = calcCoordsForPointOnCirclePerimeter(
-            [canvasWidth2x / 2, canvasHeight2x / 2],
-            circleWidth2x / 2,
-            degreesOffset
-        );
-        context.beginPath();
-        context.arc(
-            nibCoords[0],
-            nibCoords[1],
-            4 * 2,
-            degreesToRadians(0),
-            degreesToRadians(360)
-        );
-        context.fillStyle = THEME.COLORS.WHITE;
-        context.fill();
-        context.closePath();
-    }, []);
+            // render nib for progress arc
+            const nibCoords = calcCoordsForPointOnCirclePerimeter(
+                [canvasWidth2x / 2, canvasHeight2x / 2],
+                circleWidth2x / 2,
+                degreesOffset
+            );
+            context.beginPath();
+            context.arc(
+                nibCoords[0],
+                nibCoords[1],
+                4 * 2,
+                degreesToRadians(0),
+                degreesToRadians(360)
+            );
+            context.fillStyle = THEME.COLORS.WHITE;
+            context.fill();
+            context.closePath();
+        },
+        [total]
+    );
 
     // draw initial progress
     useEffect(() => {
@@ -122,6 +126,15 @@ const AppScreenMainContents = styled.main`
     align-items: center;
 `;
 
+const IntervalGlobalStyle = createGlobalStyle<{ intervalType: IntervalType }>`
+    body {
+        background-color: ${(props) =>
+            props.intervalType === IntervalType.Focus
+                ? props.theme.COLORS.BLUE
+                : props.theme.COLORS.GREEN};
+    }
+`;
+
 export function App() {
     console.log("DEBUG: render App");
 
@@ -132,9 +145,7 @@ export function App() {
     // important for progress arc to start at right location and not "jump" to the nearest second.
     const timerMsStoppedAt = useRef<number>(timerState.time);
 
-    // const TOTAL = 25 * 60 * 1000;
-    // const TOTAL = 5 * 60 * 1000;
-    const TOTAL = 10000;
+    const TOTAL = INTERVAL_LENGTH[timerState.intervalType];
 
     const WIDTH = 240;
     const HEIGHT = 240;
@@ -162,6 +173,7 @@ export function App() {
     return (
         <>
             <GlobalStyle />
+            <IntervalGlobalStyle intervalType={timerState.intervalType} />
 
             <AppScreenMainContents>
                 <Timer
@@ -170,6 +182,7 @@ export function App() {
                     progressHeight={HEIGHT}
                     maxMSInInterval={TOTAL}
                     canvasRef={canvasRef}
+                    currentIntervalType={timerState.intervalType}
                 />
 
                 <Controls
