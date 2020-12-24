@@ -5,13 +5,19 @@
         <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
         <meta
             http-equiv="Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
         />
         <meta
             http-equiv="X-Content-Security-Policy"
-            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'"
+            content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
         />
         <title>Hello World!</title>
+
+        <link rel="preconnect" href="https://fonts.gstatic.com" />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Roboto:wght@100&display=swap"
+            rel="stylesheet"
+        />
     </head>
     <body>
         <h1>Hello World!</h1>
