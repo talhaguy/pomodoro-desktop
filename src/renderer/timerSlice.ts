@@ -71,6 +71,17 @@ export const startTimerAndAnimation = (
                 startTime = time;
             }
 
+            // as long as the timer is still active, rerun the callback. otherwise, deactivate it.
+            // deactivation is triggered by the `deactivateTimer` action
+            if (state.timer.active) {
+                requestAnimationFrame(animationCb);
+            } else {
+                // dispatch(setActivate({ active: false }));
+                // resolve the amount of elapsed time for the timer
+                res(time - startTime + timerStartedFrom);
+                return;
+            }
+
             // draw the animation for elapsed time
             // `time - startTime` is the elapsed time
             // elapsed time + `timerStartedFrom` takes into account the previously elapsed time of the timer
@@ -85,21 +96,12 @@ export const startTimerAndAnimation = (
             }
 
             // deactivate the timer and reset the time when timer completes
-            if (state.timer.time >= total) {
-                dispatch(setActivate({ active: false }));
+            // use `getState()` to get the latest state
+            if (getState().timer.time >= total) {
+                dispatch(deactivateTimer());
                 dispatch(setTime({ time: 0 }));
                 // resolve `0` b/c timer is reset
                 res(0);
-            } else {
-                // as long as the timer is still active, rerun the callback. otherwise, deactivate it.
-                // deactivation is triggered by the `deactivateTimer` action
-                if (state.timer.active) {
-                    requestAnimationFrame(animationCb);
-                } else {
-                    dispatch(setActivate({ active: false }));
-                    // resolve the amount of elapsed time for the timer
-                    res(time - startTime + timerStartedFrom);
-                }
             }
         };
 

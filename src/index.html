@@ -2,7 +2,7 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+
         <meta
             http-equiv="Content-Security-Policy"
             content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
@@ -11,7 +11,8 @@
             http-equiv="X-Content-Security-Policy"
             content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;"
         />
-        <title>Hello World!</title>
+
+        <title>Pomodoro</title>
 
         <link rel="preconnect" href="https://fonts.gstatic.com" />
         <link
@@ -20,14 +21,8 @@
         />
     </head>
     <body>
-        <h1>Hello World!</h1>
-        We are using Node.js <span id="node-version"></span>, Chromium
-        <span id="chrome-version"></span>, and Electron
-        <span id="electron-version"></span>.
-
         <div id="app"></div>
 
-        <!-- You can also require other files to run in this process -->
         <script src="./renderer/index.tsx"></script>
     </body>
 </html>

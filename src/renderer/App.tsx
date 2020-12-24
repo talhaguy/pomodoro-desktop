@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { AppDispatch } from "./store";
 import { THEME } from "./theme";
+import { formatMsToMin } from "./time";
 import { selectTimer, activateTimer, deactivateTimer } from "./timerSlice";
 
 // Counter
@@ -140,7 +141,7 @@ export interface TimeProps {
 }
 
 function Time({ ms }: TimeProps) {
-    return <StyledTime>{ms}</StyledTime>;
+    return <StyledTime>{formatMsToMin(ms)}</StyledTime>;
 }
 
 // App
@@ -156,6 +157,14 @@ const GlobalStyle = createGlobalStyle`
         margin: 0;
         background-color: ${(props) => props.theme.COLORS.BLUE};
     }
+`;
+
+const AppScreenMainContents = styled.main`
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 `;
 
 const TimerProgressContainer = styled.div`
@@ -217,20 +226,22 @@ export function App() {
     return (
         <>
             <GlobalStyle />
-            <TimerProgressContainer>
-                <div className="timer">
-                    <Time ms={timerState.time} />
-                </div>
-                <div className="progress">
-                    <ProgressCircle
-                        width={WIDTH}
-                        height={HEIGHT}
-                        total={TOTAL}
-                        canvasRef={canvasRef}
-                    />
-                </div>
-            </TimerProgressContainer>
-            <button onClick={toggleTimerClick}>Toggle</button>
+            <AppScreenMainContents>
+                <TimerProgressContainer>
+                    <div className="timer">
+                        <Time ms={timerState.time} />
+                    </div>
+                    <div className="progress">
+                        <ProgressCircle
+                            width={WIDTH}
+                            height={HEIGHT}
+                            total={TOTAL}
+                            canvasRef={canvasRef}
+                        />
+                    </div>
+                </TimerProgressContainer>
+                <button onClick={toggleTimerClick}>Toggle</button>
+            </AppScreenMainContents>
         </>
     );
 }
