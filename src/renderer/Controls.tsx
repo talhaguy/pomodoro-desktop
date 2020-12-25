@@ -15,12 +15,14 @@ interface ControlsProps {
     isActive: boolean;
     toggleTimer: () => void;
     skipInterval: () => void;
+    resetInterval: () => void;
 }
 
 export const Controls: React.FC<ControlsProps> = ({
     isActive,
     toggleTimer,
     skipInterval,
+    resetInterval,
 }) => {
     return (
         <StyledControlButtons>
@@ -29,6 +31,10 @@ export const Controls: React.FC<ControlsProps> = ({
                     isActive ? ControlButtonType.Pause : ControlButtonType.Play
                 }
                 onClick={toggleTimer}
+            />
+            <ControlButton
+                type={ControlButtonType.Restart}
+                onClick={resetInterval}
             />
             <ControlButton
                 type={ControlButtonType.Skip}

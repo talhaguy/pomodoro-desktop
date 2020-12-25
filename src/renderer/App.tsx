@@ -12,6 +12,7 @@ import {
     activateTimer,
     deactivateTimer,
     skipInterval,
+    startResetInterval,
 } from "./timerSlice";
 
 // Counter
@@ -181,6 +182,18 @@ export function App() {
         });
     };
 
+    const resetIntervalCb = () => {
+        dispatch(
+            startResetInterval(() => {
+                draw(0);
+            })
+        ).then((endTimeMs) => {
+            if (endTimeMs !== null) {
+                timerMsStoppedAt.current = endTimeMs;
+            }
+        });
+    };
+
     return (
         <>
             <GlobalStyle />
@@ -200,6 +213,7 @@ export function App() {
                     isActive={timerState.active}
                     toggleTimer={toggleTimer}
                     skipInterval={skipIntervalCb}
+                    resetInterval={resetIntervalCb}
                 />
             </AppScreenMainContents>
         </>

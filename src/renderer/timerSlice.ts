@@ -12,6 +12,7 @@ export interface TimerState {
     intervalType: IntervalType;
     numFocusIntervalsCompleted: number;
     skip: boolean;
+    reset: boolean;
 }
 
 const initialState: TimerState = {
@@ -20,6 +21,7 @@ const initialState: TimerState = {
     intervalType: IntervalType.Focus,
     numFocusIntervalsCompleted: 0,
     skip: false,
+    reset: false,
 };
 
 export const timerSlice = createSlice({
@@ -32,6 +34,7 @@ export const timerSlice = createSlice({
 
         setActivate: (state, action: PayloadAction<{ active: boolean }>) => {
             state.skip = false;
+            state.reset = false;
             state.active = action.payload.active;
         },
 
@@ -51,7 +54,24 @@ export const timerSlice = createSlice({
             state.skip = true;
         },
 
+        setToResetInterval: (state) => {
+            // marks reset as true
+            // this alone does not reset the interval
+            // the `animationCB` will check for `reset` and resolve the appropriate return value
+            // and reset the interval
+            state.reset = true;
+        },
+
+        resetInterval: (state) => {
+            // does not stop the actual timer
+            // just sets the state values
+            state.active = false;
+            state.time = 0;
+        },
+
         nextInterval: (state) => {
+            // does not stop the actual timer
+            // just sets the state values
             state.active = false;
             state.time = 0;
 
@@ -97,6 +117,8 @@ export const {
     setActivate,
     deactivateTimer,
     setToSkipInterval,
+    setToResetInterval,
+    resetInterval,
     nextInterval,
 } = timerSlice.actions;
 
@@ -139,6 +161,36 @@ export const skipInterval = (resetAnimation: () => void) => (
     }
 };
 
+export const startResetInterval = (resetAnimation: () => void) => (
+    dispatch: AppDispatch,
+    getState: () => RootState
+): Promise<number | null> => {
+    // if the timer is active, set state to reset interval (as timer animation callback is active)
+    // if the timer is not active (timer paused or at not started),
+    // run the steps to reset the interval
+    // dispatch of this action resolves `0` for the component to track elapsed timer time when timer is not active
+    // otherwise when the timer is active, it resolves `null` as the `animationCb` in `startTimerAndAnimation` will
+    // return the `0` for elapsed timer time. in this case the component doesn't need to store the elapsed time as
+    // when the promise in `animationCb` resolves, it will resolve with `0` anyway
+    // if user does not confirm the action, `null` is resolved
+
+    const isConfirmed = confirm(
+        "Are you sure you want to reset this interval?"
+    );
+    if (!isConfirmed) {
+        return Promise.resolve(null);
+    }
+
+    if (getState().timer.active) {
+        dispatch(setToResetInterval());
+        return Promise.resolve(null);
+    } else {
+        dispatch(resetInterval());
+        resetAnimation();
+        return Promise.resolve(0);
+    }
+};
+
 export const startTimerAndAnimation = (
     draw: (elapsedMs: number) => void,
     timerStartedFrom: number,
@@ -163,18 +215,18 @@ export const startTimerAndAnimation = (
                 return;
             }
 
-            if (!startTime) {
-                startTime = time;
+            // if the state is set to reset the interval
+            if (state.timer.reset) {
+                dispatch(resetInterval());
+                // reset the progress animation
+                draw(0);
+                // resolve `0` b/c timer is reset
+                res(0);
+                return;
             }
 
-            // as long as the timer is still active, rerun the callback. otherwise, deactivate it.
-            // deactivation is triggered by the `deactivateTimer` action
-            if (state.timer.active) {
-                requestAnimationFrame(animationCb);
-            } else {
-                // resolve the amount of elapsed time for the timer
-                res(time - startTime + timerStartedFrom);
-                return;
+            if (!startTime) {
+                startTime = time;
             }
 
             // draw the animation for elapsed time
@@ -198,6 +250,16 @@ export const startTimerAndAnimation = (
                 draw(0);
                 // resolve `0` b/c timer is reset
                 res(0);
+                return;
+            }
+
+            // as long as the timer is still active, rerun the callback. otherwise, deactivate it.
+            // deactivation is triggered by the `deactivateTimer` action
+            if (getState().timer.active) {
+                requestAnimationFrame(animationCb);
+            } else {
+                // resolve the amount of elapsed time for the timer
+                res(time - startTime + timerStartedFrom);
                 return;
             }
         };
