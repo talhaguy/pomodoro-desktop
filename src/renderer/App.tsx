@@ -1,15 +1,18 @@
 import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
-import { Button } from "./Button";
 import { Controls } from "./Controls";
 import { GlobalStyle } from "./GlobalStyle";
 import { IntervalType, INTERVAL_LENGTH } from "./interval";
 import { AppDispatch } from "./store";
 import { THEME } from "./theme";
-import { formatMsToMin } from "./time";
 import { Timer } from "./Timer";
-import { selectTimer, activateTimer, deactivateTimer } from "./timerSlice";
+import {
+    selectTimer,
+    activateTimer,
+    deactivateTimer,
+    skipInterval,
+} from "./timerSlice";
 
 // Counter
 
@@ -36,7 +39,6 @@ export function useRenderProgressCircleInCanvas(
     circleWidth: number,
     total: number
 ) {
-    console.log("useRenderProgressCircleInCanvas");
     const canvasRef = useRef<HTMLCanvasElement>();
 
     const draw = useCallback(
@@ -136,8 +138,6 @@ const IntervalGlobalStyle = createGlobalStyle<{ intervalType: IntervalType }>`
 `;
 
 export function App() {
-    console.log("DEBUG: render App");
-
     const timerState = useSelector(selectTimer);
     const dispatch = useDispatch<AppDispatch>();
 
@@ -163,11 +163,22 @@ export function App() {
         } else {
             dispatch(activateTimer(draw, timerMsStoppedAt.current, TOTAL)).then(
                 (endTimeMs) => {
-                    console.log("timer has stopped!!!", endTimeMs);
                     timerMsStoppedAt.current = endTimeMs;
                 }
             );
         }
+    };
+
+    const skipIntervalCb = () => {
+        dispatch(
+            skipInterval(() => {
+                draw(0);
+            })
+        ).then((endTimeMs) => {
+            if (endTimeMs !== null) {
+                timerMsStoppedAt.current = endTimeMs;
+            }
+        });
     };
 
     return (
@@ -186,8 +197,9 @@ export function App() {
                 />
 
                 <Controls
-                    toggleTimer={toggleTimer}
                     isActive={timerState.active}
+                    toggleTimer={toggleTimer}
+                    skipInterval={skipIntervalCb}
                 />
             </AppScreenMainContents>
         </>

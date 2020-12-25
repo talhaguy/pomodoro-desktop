@@ -12,8 +12,6 @@ export function ProgressCircle({
     height,
     canvasRef,
 }: ProgressCircleProps) {
-    console.log("ProgressCircle");
-
     return (
         <canvas
             ref={canvasRef}
