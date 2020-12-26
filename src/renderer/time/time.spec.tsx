@@ -1,5 +1,6 @@
-import { formatMsToMin, fillWithZerosForDigits } from "./time";
-describe("time", () => {
+import { formatMsToMin, fillWithZerosForDigits } from "./format";
+
+describe("format", () => {
     describe("formatMsToMin()", () => {
         it("should format a given ms number to minutes and seconds", () => {
             expect(formatMsToMin(1000)).toBe("00:01");
