@@ -1,0 +1,10 @@
+{
+    "interval.focus": "Focus",
+    "interval.shortBreak": "Short Break",
+    "interval.longBreak": "Long Break",
+    "notification.intervalComplete.title.intervalComplete": " Interval Complete",
+    "notification.intervalComplete.body.focus": "Great work! It's time to take a break.",
+    "notification.intervalComplete.body.break": "Break time's over! It's time to focus.",
+    "timer.confirm.reset": "Are you sure you want to reset this interval?",
+    "timer.confirm.skip": "Are you sure you want to skip this interval?"
+}

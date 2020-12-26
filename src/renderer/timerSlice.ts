@@ -5,6 +5,7 @@ import {
     NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK,
 } from "./interval";
 import { AppDispatch, RootState } from "./store";
+import LOCALIZATION from "./localization.json";
 
 export interface TimerState {
     time: number;
@@ -146,7 +147,7 @@ export const skipInterval = (resetAnimation: () => void) => (
     // when the promise in `animationCb` resolves, it will resolve with `0` anyway
     // if user does not confirm the action, `null` is resolved
 
-    const isConfirmed = confirm("Are you sure you want to skip this interval?");
+    const isConfirmed = confirm(LOCALIZATION["timer.confirm.skip"]);
     if (!isConfirmed) {
         return Promise.resolve(null);
     }
@@ -174,9 +175,7 @@ export const startResetInterval = (resetAnimation: () => void) => (
     // when the promise in `animationCb` resolves, it will resolve with `0` anyway
     // if user does not confirm the action, `null` is resolved
 
-    const isConfirmed = confirm(
-        "Are you sure you want to reset this interval?"
-    );
+    const isConfirmed = confirm(LOCALIZATION["timer.confirm.reset"]);
     if (!isConfirmed) {
         return Promise.resolve(null);
     }
@@ -245,6 +244,40 @@ export const startTimerAndAnimation = (
             // deactivate the timer and reset the time when timer completes
             // use `getState()` to get the latest state
             if (getState().timer.time >= total) {
+                // show notification if app is not focused
+                if (!document.hasFocus()) {
+                    let localizationTitleKey: string;
+                    switch (state.timer.intervalType) {
+                        case IntervalType.Focus:
+                            localizationTitleKey = "interval.focus";
+                            break;
+                        case IntervalType.ShortBreak:
+                            localizationTitleKey = "interval.shortBreak";
+                            break;
+                        case IntervalType.LongBreak:
+                            localizationTitleKey = "interval.longBreak";
+                            break;
+                    }
+
+                    new Notification(
+                        LOCALIZATION[localizationTitleKey] +
+                            LOCALIZATION[
+                                "notification.intervalComplete.title.intervalComplete"
+                            ],
+                        {
+                            body:
+                                state.timer.intervalType === IntervalType.Focus
+                                    ? LOCALIZATION[
+                                          "notification.intervalComplete.body.focus"
+                                      ]
+                                    : LOCALIZATION[
+                                          "notification.intervalComplete.body.break"
+                                      ],
+                            silent: false,
+                        }
+                    );
+                }
+
                 dispatch(nextInterval());
                 // reset the progress animation
                 draw(0);

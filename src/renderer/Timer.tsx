@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Clock } from "./Clock";
 import { IntervalType } from "./interval";
 import { ProgressCircle } from "./ProgressCircle";
+import LOCALIZATION from "./localization.json";
 
 const TimerProgressContainer = styled.div`
     position: relative;
@@ -53,13 +54,13 @@ export const Timer: React.FC<TimerProps> = ({
     let intervalLabel: String;
     switch (currentIntervalType) {
         case IntervalType.Focus:
-            intervalLabel = "Focus";
+            intervalLabel = LOCALIZATION["interval.focus"];
             break;
         case IntervalType.ShortBreak:
-            intervalLabel = "Short Break";
+            intervalLabel = LOCALIZATION["interval.shortBreak"];
             break;
         case IntervalType.LongBreak:
-            intervalLabel = "Long Break";
+            intervalLabel = LOCALIZATION["interval.longBreak"];
             break;
     }
 
