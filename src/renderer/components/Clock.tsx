@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { formatMsToMin } from "./time";
+import { formatMsToMin } from "../time";
 
 const StyledTime = styled.div`
     font-size: 7.2rem;

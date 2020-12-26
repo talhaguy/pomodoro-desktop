@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
-import { App } from "./App";
+import { App } from "./components";
 import { store } from "./store";
 import { THEME } from "./style";
 

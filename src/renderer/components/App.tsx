@@ -2,8 +2,8 @@ import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
-import { IntervalType, INTERVAL_LENGTH } from "./interval";
-import { THEME, GlobalStyle } from "./style";
+import { IntervalType, INTERVAL_LENGTH } from "../interval";
+import { THEME, GlobalStyle } from "../style";
 import { Timer } from "./Timer";
 import {
     AppDispatch,
@@ -12,7 +12,7 @@ import {
     deactivateTimer,
     skipInterval,
     startResetInterval,
-} from "./store";
+} from "../store";
 
 // Counter
 

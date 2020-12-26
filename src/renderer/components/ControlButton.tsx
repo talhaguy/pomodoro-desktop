@@ -1,10 +1,10 @@
 import React from "react";
 import { Button } from "./Button";
 import styled from "styled-components";
-import pauseImg from "../../images/pause-white.svg";
-import playImg from "../../images/play_arrow-white.svg";
-import skipImg from "../../images/skip_next-white.svg";
-import restartImg from "../../images/replay-white.svg";
+import pauseImg from "../../../images/pause-white.svg";
+import playImg from "../../../images/play_arrow-white.svg";
+import skipImg from "../../../images/skip_next-white.svg";
+import restartImg from "../../../images/replay-white.svg";
 
 export enum ControlButtonType {
     Play,
