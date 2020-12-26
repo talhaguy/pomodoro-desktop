@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from "electron";
 import path from "path";
-import { Environment } from "../shared/environment";
+import { Environment } from "../shared";
 
 function createWindow() {
     const mainWindow = new BrowserWindow({
