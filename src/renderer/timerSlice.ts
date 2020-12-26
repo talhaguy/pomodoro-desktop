@@ -5,7 +5,7 @@ import {
     NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK,
 } from "./interval";
 import { AppDispatch, RootState } from "./store";
-import LOCALIZATION from "./localization.json";
+import { LOCALIZATION } from "./localization";
 
 export interface TimerState {
     time: number;

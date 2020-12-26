@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Clock } from "./Clock";
 import { IntervalType } from "./interval";
 import { ProgressCircle } from "./ProgressCircle";
-import LOCALIZATION from "./localization.json";
+import { LOCALIZATION } from "./localization";
 
 const TimerProgressContainer = styled.div`
     position: relative;
