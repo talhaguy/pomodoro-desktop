@@ -1,9 +1,9 @@
-import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
+import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
 import { IntervalType, INTERVAL_LENGTH } from "../interval";
-import { THEME, GlobalStyle } from "../style";
+import { GlobalStyle } from "../style";
 import { Timer } from "./Timer";
 import {
     AppDispatch,
@@ -13,112 +13,7 @@ import {
     skipInterval,
     startResetInterval,
 } from "../store";
-
-// Counter
-
-export function degreesToRadians(degrees: number) {
-    return (Math.PI / 180) * degrees;
-}
-
-export type Coordinates = [x: number, y: number];
-
-export function calcCoordsForPointOnCirclePerimeter(
-    centerOfCircle: Coordinates,
-    radius: number,
-    degrees: number
-): Coordinates {
-    const radians = degreesToRadians(degrees);
-    const x = centerOfCircle[0] + radius * Math.cos(radians);
-    const y = centerOfCircle[1] + radius * Math.sin(radians);
-    return [x, y];
-}
-
-export function useRenderProgressCircleInCanvas(
-    canvasWidth: number,
-    canvasHeight: number,
-    circleWidth: number,
-    total: number
-) {
-    const canvasRef = useRef<HTMLCanvasElement>();
-
-    const draw = useCallback(
-        (elapsedMs: number) => {
-            const percentage = elapsedMs / total;
-            const degrees = 360 * percentage;
-            const degreesOffset = degrees - 90;
-            const radians = degreesToRadians(degreesOffset);
-
-            // make 2x bigger for higher device pixel ratio
-            const canvasWidth2x = canvasWidth * 2;
-            const canvasHeight2x = canvasHeight * 2;
-            const circleWidth2x = circleWidth * 2;
-
-            const context = canvasRef.current.getContext("2d");
-            context.clearRect(0, 0, canvasWidth2x, canvasHeight2x);
-
-            // render full outline circle
-            context.globalAlpha = 0.2;
-            context.beginPath();
-            context.arc(
-                canvasWidth2x / 2,
-                canvasHeight2x / 2,
-                circleWidth2x / 2,
-                degreesToRadians(0),
-                degreesToRadians(360)
-            );
-            context.strokeStyle = THEME.COLORS.WHITE;
-            context.lineWidth = 2 * 2;
-            context.stroke();
-            context.closePath();
-            context.globalAlpha = 1;
-
-            // render progress arc
-            context.beginPath();
-            context.arc(
-                canvasWidth2x / 2,
-                canvasHeight2x / 2,
-                circleWidth2x / 2,
-                degreesToRadians(-90),
-                radians
-            );
-            context.strokeStyle = THEME.COLORS.WHITE;
-            context.lineWidth = 2 * 2;
-            context.stroke();
-            context.closePath();
-
-            // render nib for progress arc
-            const nibCoords = calcCoordsForPointOnCirclePerimeter(
-                [canvasWidth2x / 2, canvasHeight2x / 2],
-                circleWidth2x / 2,
-                degreesOffset
-            );
-            context.beginPath();
-            context.arc(
-                nibCoords[0],
-                nibCoords[1],
-                4 * 2,
-                degreesToRadians(0),
-                degreesToRadians(360)
-            );
-            context.fillStyle = THEME.COLORS.WHITE;
-            context.fill();
-            context.closePath();
-        },
-        [total]
-    );
-
-    // draw initial progress
-    useEffect(() => {
-        draw(0);
-    }, []);
-
-    return [canvasRef, draw] as [
-        MutableRefObject<HTMLCanvasElement>,
-        typeof draw
-    ];
-}
-
-// App
+import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
 
 const AppScreenMainContents = styled.main`
     height: 100vh;
