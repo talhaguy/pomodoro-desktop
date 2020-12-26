@@ -1,119 +1,8 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { batch } from "react-redux";
-import {
-    IntervalType,
-    NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK,
-} from "./interval";
+import { IntervalType } from "../interval";
+import { LOCALIZATION } from "../localization";
+import { batchPromise } from "./batchPromise";
 import { AppDispatch, RootState } from "./store";
-import { LOCALIZATION } from "./localization";
-
-export interface TimerState {
-    time: number;
-    active: boolean;
-    intervalType: IntervalType;
-    numFocusIntervalsCompleted: number;
-    skip: boolean;
-    reset: boolean;
-}
-
-const initialState: TimerState = {
-    time: 0,
-    active: false,
-    intervalType: IntervalType.Focus,
-    numFocusIntervalsCompleted: 0,
-    skip: false,
-    reset: false,
-};
-
-export const timerSlice = createSlice({
-    name: "timer",
-    initialState,
-    reducers: {
-        increment: (state) => {
-            state.time += 1000;
-        },
-
-        setActivate: (state, action: PayloadAction<{ active: boolean }>) => {
-            state.skip = false;
-            state.reset = false;
-            state.active = action.payload.active;
-        },
-
-        deactivateTimer: (state) => {
-            // set the state to deactivated
-            // this alone does not stop the timer
-            // the `animationCB` in `startTimerAndAnimation` will check for the active state
-            // to determine whether to stop or not
-            state.active = false;
-        },
-
-        setToSkipInterval: (state) => {
-            // marks skip as true
-            // this alone does not skip the interval
-            // the `animationCB` will check for `skip` and resolve the appropriate return value
-            // and skip the interval
-            state.skip = true;
-        },
-
-        setToResetInterval: (state) => {
-            // marks reset as true
-            // this alone does not reset the interval
-            // the `animationCB` will check for `reset` and resolve the appropriate return value
-            // and reset the interval
-            state.reset = true;
-        },
-
-        resetInterval: (state) => {
-            // does not stop the actual timer
-            // just sets the state values
-            state.active = false;
-            state.time = 0;
-        },
-
-        nextInterval: (state) => {
-            // does not stop the actual timer
-            // just sets the state values
-            state.active = false;
-            state.time = 0;
-
-            switch (state.intervalType) {
-                case IntervalType.Focus:
-                    state.numFocusIntervalsCompleted += 1;
-
-                    if (
-                        state.numFocusIntervalsCompleted %
-                            NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK ===
-                        0
-                    ) {
-                        state.intervalType = IntervalType.LongBreak;
-                    } else {
-                        state.intervalType = IntervalType.ShortBreak;
-                    }
-                    break;
-
-                case IntervalType.ShortBreak:
-                case IntervalType.LongBreak:
-                    state.intervalType = IntervalType.Focus;
-                    break;
-            }
-        },
-    },
-});
-
-// the redux `batch` does not return any value
-// this function wraps the original `batch` function so that any promise returned from
-// a dispatched action can be accessed
-export function batchPromise<T>(cb: () => Promise<T>) {
-    return new Promise<T>((res, rej) => {
-        batch(() => {
-            cb()
-                .then((data) => res(data))
-                .catch((err) => rej(err));
-        });
-    });
-}
-
-export const {
+import {
     increment,
     setActivate,
     deactivateTimer,
@@ -121,7 +10,7 @@ export const {
     setToResetInterval,
     resetInterval,
     nextInterval,
-} = timerSlice.actions;
+} from "./timerSlice";
 
 export const activateTimer = (
     draw: (elapsedMs: number) => void,
@@ -300,5 +189,3 @@ export const startTimerAndAnimation = (
         requestAnimationFrame(animationCb);
     });
 };
-
-export const selectTimer = (state: RootState) => state.timer;

@@ -3,17 +3,16 @@ import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
 import { IntervalType, INTERVAL_LENGTH } from "./interval";
-import { AppDispatch } from "./store";
-import { THEME } from "./style";
-import { GlobalStyle } from "./style";
+import { THEME, GlobalStyle } from "./style";
 import { Timer } from "./Timer";
 import {
+    AppDispatch,
     selectTimer,
     activateTimer,
     deactivateTimer,
     skipInterval,
     startResetInterval,
-} from "./timerSlice";
+} from "./store";
 
 // Counter
 
