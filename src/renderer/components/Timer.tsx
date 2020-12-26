@@ -68,7 +68,9 @@ export const Timer: React.FC<TimerProps> = ({
         <TimerProgressContainer>
             <div className="timer">
                 <Clock ms={timeInMS} />
-                <span className="current-interval">{intervalLabel}</span>
+                <span className="current-interval" data-testid="interval-label">
+                    {intervalLabel}
+                </span>
             </div>
             <div className="progress">
                 <ProgressCircle
