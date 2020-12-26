@@ -1,4 +1,4 @@
-import { Environment } from "../shared";
+import { Environment } from "../../shared";
 
 export enum IntervalType {
     Focus = "Focus",
