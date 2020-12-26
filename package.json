@@ -4,7 +4,7 @@
     "description": "",
     "main": "dist/main.js",
     "scripts": {
-        "build:renderer": "parcel build ./src/index.html --public-url ./",
+        "build:renderer": "parcel build ./src/renderer/index.html --public-url ./",
         "build:preload": "parcel build ./src/preload/index.ts --target node --out-file preload.js",
         "build:main": "parcel build ./src/main/index.ts --target node --out-file main.js",
         "build": "npm run build:renderer && npm run build:preload && npm run build:main",
