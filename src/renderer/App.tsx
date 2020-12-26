@@ -2,10 +2,10 @@ import React, { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
-import { GlobalStyle } from "./GlobalStyle";
 import { IntervalType, INTERVAL_LENGTH } from "./interval";
 import { AppDispatch } from "./store";
-import { THEME } from "./theme";
+import { THEME } from "./style";
+import { GlobalStyle } from "./style";
 import { Timer } from "./Timer";
 import {
     selectTimer,
