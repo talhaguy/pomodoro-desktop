@@ -14,3 +14,13 @@ export function calcCoordsForPointOnCirclePerimeter(
     const y = centerOfCircle[1] + radius * Math.sin(radians);
     return [x, y];
 }
+
+export function calcDegreesComplete(
+    part: number,
+    total: number,
+    offsetDegrees: number
+) {
+    const percentage = part / total;
+    const degrees = 360 * percentage;
+    return degrees - offsetDegrees;
+}

@@ -2,6 +2,7 @@ import { MutableRefObject, useCallback, useEffect, useRef } from "react";
 import {
     degreesToRadians,
     calcCoordsForPointOnCirclePerimeter,
+    calcDegreesComplete,
 } from "../geometry";
 import { THEME } from "../style";
 
@@ -15,9 +16,7 @@ export function useRenderProgressCircleInCanvas(
 
     const draw = useCallback(
         (elapsedMs: number) => {
-            const percentage = elapsedMs / total;
-            const degrees = 360 * percentage;
-            const degreesOffset = degrees - 90;
+            const degreesOffset = calcDegreesComplete(elapsedMs, total, 90);
             const radians = degreesToRadians(degreesOffset);
 
             // make 2x bigger for higher device pixel ratio
