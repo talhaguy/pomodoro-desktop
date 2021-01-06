@@ -1,6 +1,6 @@
-# Pomodoro App v1.0
+# Pomodoro App
 
-![Screenshot of app](./screenshot.png)
+<img src="./screenshot.png" width="400" height="400">
 
 ## Tech
 
@@ -10,3 +10,13 @@
 -   Redux
 -   Canvas
 -   Jest
+
+## Release Notes
+
+### 1.0.1
+
+-   Fixed bug in which notifications were not firing when app window was hidden
+
+### 1.0
+
+-   MVP release: Play, pause, restart, and skip timer
