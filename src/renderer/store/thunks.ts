@@ -133,40 +133,6 @@ export const startTimerAndAnimation = (
             // deactivate the timer and reset the time when timer completes
             // use `getState()` to get the latest state
             if (getState().timer.time >= total) {
-                // show notification if app is not focused
-                if (!document.hasFocus()) {
-                    let localizationTitleKey: string;
-                    switch (state.timer.intervalType) {
-                        case IntervalType.Focus:
-                            localizationTitleKey = "interval.focus";
-                            break;
-                        case IntervalType.ShortBreak:
-                            localizationTitleKey = "interval.shortBreak";
-                            break;
-                        case IntervalType.LongBreak:
-                            localizationTitleKey = "interval.longBreak";
-                            break;
-                    }
-
-                    new Notification(
-                        LOCALIZATION[localizationTitleKey] +
-                            LOCALIZATION[
-                                "notification.intervalComplete.title.intervalComplete"
-                            ],
-                        {
-                            body:
-                                state.timer.intervalType === IntervalType.Focus
-                                    ? LOCALIZATION[
-                                          "notification.intervalComplete.body.focus"
-                                      ]
-                                    : LOCALIZATION[
-                                          "notification.intervalComplete.body.break"
-                                      ],
-                            silent: false,
-                        }
-                    );
-                }
-
                 dispatch(nextInterval());
                 // reset the progress animation
                 draw(0);

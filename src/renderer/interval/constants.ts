@@ -8,7 +8,8 @@ export enum IntervalType {
 
 // stores length of interval types in ms
 export const INTERVAL_LENGTH =
-    typeof ENV !== "undefined" && ENV === Environment.Dev
+    typeof ENV !== "undefined" &&
+    (ENV === Environment.Dev || ENV === Environment.Test)
         ? {
               [IntervalType.Focus]: 5 * 1000,
               [IntervalType.ShortBreak]: 1 * 1000,

@@ -25,10 +25,6 @@ describe("thunks", () => {
                 },
             };
             getState = jest.fn().mockReturnValue(rootState);
-
-            window.Notification = jest.fn() as any;
-
-            window.document.hasFocus = jest.fn().mockReturnValue(true);
         });
 
         afterEach(() => {
@@ -75,49 +71,6 @@ describe("thunks", () => {
                 expect(draw).toHaveBeenCalledWith(0);
                 expect(draw).toHaveBeenCalledTimes(1);
                 expect(time).toBe(0);
-                done();
-            });
-        });
-
-        it("should break out of raf loop when timer is done and should not show notification when window is focused", (done) => {
-            rootState.timer.active = true;
-            rootState.timer.time = 5000;
-
-            const promise = startTimerAndAnimation(
-                draw,
-                0,
-                5000
-            )(dispatch, getState);
-
-            promise.then((time) => {
-                expect(dispatch.mock.calls[0][0].type).toBe(
-                    "timer/nextInterval"
-                );
-                expect(draw).toHaveBeenCalledWith(0);
-                expect(time).toBe(0);
-                expect(window.Notification).not.toHaveBeenCalled();
-                done();
-            });
-        });
-
-        it("should break out of raf loop when timer is done and should show notification when window is unfocused", (done) => {
-            window.document.hasFocus = jest.fn().mockReturnValue(false);
-            rootState.timer.active = true;
-            rootState.timer.time = 5000;
-
-            const promise = startTimerAndAnimation(
-                draw,
-                0,
-                5000
-            )(dispatch, getState);
-
-            promise.then((time) => {
-                expect(dispatch.mock.calls[0][0].type).toBe(
-                    "timer/nextInterval"
-                );
-                expect(draw).toHaveBeenCalledWith(0);
-                expect(time).toBe(0);
-                expect(window.Notification).toHaveBeenCalled();
                 done();
             });
         });

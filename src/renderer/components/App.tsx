@@ -14,6 +14,7 @@ import {
     startResetInterval,
 } from "../store";
 import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
+import { useSetTimerNotification } from "./useSetTimerNotification";
 
 const AppScreenMainContents = styled.main`
     height: 100vh;
@@ -35,6 +36,12 @@ const IntervalGlobalStyle = createGlobalStyle<{ intervalType: IntervalType }>`
 export function App() {
     const timerState = useSelector(selectTimer);
     const dispatch = useDispatch<AppDispatch>();
+
+    useSetTimerNotification(
+        timerState.time,
+        timerState.intervalType,
+        timerState.active
+    );
 
     // store accurate no. of ms timer stopped at (as state only stores to the second).
     // important for progress arc to start at right location and not "jump" to the nearest second.
