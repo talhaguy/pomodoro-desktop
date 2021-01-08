@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, Menu } from "electron";
 import path from "path";
 import { Environment } from "../shared";
 
@@ -20,6 +20,9 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
+    const menu = Menu.buildFromTemplate([]);
+    Menu.setApplicationMenu(menu);
+
     createWindow();
 
     app.on("activate", function () {
