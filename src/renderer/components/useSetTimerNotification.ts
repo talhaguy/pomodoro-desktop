@@ -1,7 +1,6 @@
-import { useContext, useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { IntervalType, INTERVAL_LENGTH } from "../interval";
 import { LOCALIZATION } from "../localization";
-import { DocumentVisibilityContext } from "./DocumentVisibilityContext";
 
 export function useSetTimerNotification(
     timeInMs: number,
@@ -9,14 +8,21 @@ export function useSetTimerNotification(
     isTimerActive: boolean
 ) {
     const timeInMsRemaining = INTERVAL_LENGTH[intervalType] - timeInMs;
+    const timeInMsRemainingRef = useRef(timeInMsRemaining);
     const tidRef = useRef(null);
-    const documentVisibility = useContext(DocumentVisibilityContext);
 
     useEffect(() => {
-        const visibilityHandler = () => {
-            const isVisible = documentVisibility.isVisible();
+        timeInMsRemainingRef.current = timeInMsRemaining;
+    });
 
-            if (!isVisible) {
+    useEffect(() => {
+        const focusHandler = () => {
+            clearTimeout(tidRef.current);
+            tidRef.current = null;
+        };
+
+        const blurHandler = () => {
+            if (isTimerActive) {
                 tidRef.current = setTimeout(() => {
                     let localizationTitleKey: string;
 
@@ -49,24 +55,16 @@ export function useSetTimerNotification(
                             silent: false,
                         }
                     );
-                }, timeInMsRemaining);
-            } else {
-                clearTimeout(tidRef.current);
-                tidRef.current = null;
+                }, timeInMsRemainingRef.current);
             }
         };
 
-        if (isTimerActive) {
-            window.addEventListener("visibilitychange", visibilityHandler);
-        }
+        window.addEventListener("focus", focusHandler);
+        window.addEventListener("blur", blurHandler);
 
         return () => {
-            if (isTimerActive) {
-                window.removeEventListener(
-                    "visibilitychange",
-                    visibilityHandler
-                );
-            }
+            window.removeEventListener("focus", focusHandler);
+            window.removeEventListener("blur", blurHandler);
         };
-    }, [timeInMsRemaining, intervalType, isTimerActive, tidRef.current]);
+    }, [isTimerActive, intervalType]);
 }
