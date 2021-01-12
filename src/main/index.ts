@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu } from "electron";
+import { app, BrowserWindow, Menu, MenuItemConstructorOptions } from "electron";
 import path from "path";
 import { Environment } from "../shared";
 
@@ -19,10 +19,79 @@ function createWindow() {
     }
 }
 
-app.whenReady().then(() => {
-    const menu = Menu.buildFromTemplate([]);
-    Menu.setApplicationMenu(menu);
+function createMenu() {
+    const viewMenuTemplate: MenuItemConstructorOptions = {
+        label: "View",
+        submenu: [
+            { role: "reload" },
+            { role: "forceReload" },
+            { type: "separator" },
+            { role: "resetZoom" },
+            { role: "zoomIn" },
+            { role: "zoomOut" },
+            { type: "separator" },
+            { role: "togglefullscreen" },
+        ],
+    };
 
+    if (process.env.ENV === Environment.Dev) {
+        (viewMenuTemplate.submenu as MenuItemConstructorOptions[]).push({
+            role: "toggleDevTools",
+        });
+    }
+
+    const isMac = process.platform === "darwin";
+    const menuTemplate = [].concat(
+        // for mac, set up the app menu
+        isMac
+            ? [
+                  {
+                      label: app.name,
+                      submenu: [
+                          { role: "about" },
+                          { type: "separator" },
+                          { role: "hide" },
+                          { role: "hideothers" },
+                          { role: "unhide" },
+                          { type: "separator" },
+                          { role: "quit" },
+                      ],
+                  },
+              ]
+            : [],
+        [
+            {
+                label: "File",
+                submenu: [{ role: "quit" }],
+            },
+            viewMenuTemplate,
+            {
+                label: "Window",
+                submenu: [
+                    { role: "minimize" },
+                    { role: "zoom" },
+                    { role: "close" },
+                ],
+            },
+        ],
+        // for windows and linux, have an about item in the help menu
+        !isMac
+            ? [
+                  {
+                      label: "Help",
+                      submenu: [{ role: "about" }],
+                  },
+              ]
+            : []
+    );
+
+    const menu = Menu.buildFromTemplate(menuTemplate);
+
+    Menu.setApplicationMenu(menu);
+}
+
+app.whenReady().then(() => {
+    createMenu();
     createWindow();
 
     app.on("activate", function () {
