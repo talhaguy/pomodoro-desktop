@@ -21,7 +21,7 @@ export function setActivate(
 export function deactivateTimer(state: TimerState) {
     // set the state to deactivated
     // this alone does not stop the timer
-    // the `animationCB` in `startTimerAndAnimation` will check for the active state
+    // the `animationCB` in `startTimerAnimation` will check for the active state
     // to determine whether to stop or not
     state.active = false;
 }

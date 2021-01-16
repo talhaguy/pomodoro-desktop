@@ -4,7 +4,9 @@ export {
     activateTimer,
     skipInterval,
     startResetInterval,
-    startTimerAndAnimation,
+    startTimerAnimation,
+    startTimer,
+    stopTimer,
 } from "./thunks";
 
 export {

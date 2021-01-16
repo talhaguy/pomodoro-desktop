@@ -12,6 +12,8 @@ import {
     deactivateTimer,
     skipInterval,
     startResetInterval,
+    startTimer,
+    stopTimer,
 } from "../store";
 import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
 import { useSetTimerNotification } from "./useSetTimerNotification";
@@ -47,6 +49,9 @@ export function App() {
     // important for progress arc to start at right location and not "jump" to the nearest second.
     const timerMsStoppedAt = useRef<number>(timerState.time);
 
+    // store interval id
+    const intervalIdRef = useRef<NodeJS.Timer>();
+
     const TOTAL = INTERVAL_LENGTH[timerState.intervalType];
 
     const WIDTH = 240;
@@ -62,18 +67,25 @@ export function App() {
     const toggleTimer = () => {
         if (timerState.active) {
             dispatch(deactivateTimer());
+            dispatch(stopTimer(intervalIdRef.current));
         } else {
             dispatch(activateTimer(draw, timerMsStoppedAt.current, TOTAL)).then(
                 (endTimeMs) => {
                     timerMsStoppedAt.current = endTimeMs;
                 }
             );
+
+            intervalIdRef.current = dispatch(
+                startTimer(TOTAL, () => {
+                    // TODO: see if notitification can be fired here
+                })
+            );
         }
     };
 
     const skipIntervalCb = () => {
         dispatch(
-            skipInterval(() => {
+            skipInterval(intervalIdRef.current, () => {
                 draw(0);
             })
         ).then((endTimeMs) => {
@@ -85,7 +97,7 @@ export function App() {
 
     const resetIntervalCb = () => {
         dispatch(
-            startResetInterval(() => {
+            startResetInterval(intervalIdRef.current, () => {
                 draw(0);
             })
         ).then((endTimeMs) => {

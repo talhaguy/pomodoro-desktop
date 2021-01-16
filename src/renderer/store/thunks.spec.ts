@@ -1,11 +1,11 @@
 import { IntervalType } from "../interval";
 import { RootState } from "./store";
-import { startTimerAndAnimation } from "./thunks";
+import { startTimerAnimation } from "./thunks";
 
 jest.setTimeout(10000);
 
 describe("thunks", () => {
-    describe("startTimerAndAnimation()", () => {
+    describe("startTimerAnimation()", () => {
         let draw;
         let dispatch;
         let rootState: RootState;
@@ -35,7 +35,7 @@ describe("thunks", () => {
             rootState.timer.active = true;
             rootState.timer.skip = true;
 
-            const promise = startTimerAndAnimation(
+            const promise = startTimerAnimation(
                 draw,
                 0,
                 5000
@@ -57,7 +57,7 @@ describe("thunks", () => {
             rootState.timer.active = true;
             rootState.timer.reset = true;
 
-            const promise = startTimerAndAnimation(
+            const promise = startTimerAnimation(
                 draw,
                 0,
                 5000

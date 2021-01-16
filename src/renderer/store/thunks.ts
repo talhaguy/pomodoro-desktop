@@ -1,11 +1,10 @@
-import { IntervalType } from "../interval";
+import { batch } from "react-redux";
 import { LOCALIZATION } from "../localization";
 import { batchPromise } from "./batchPromise";
 import { AppDispatch, RootState } from "./store";
 import {
     increment,
     setActivate,
-    deactivateTimer,
     setToSkipInterval,
     setToResetInterval,
     resetInterval,
@@ -19,11 +18,14 @@ export const activateTimer = (
 ) => (dispatch: AppDispatch) => {
     return batchPromise(() => {
         dispatch(setActivate({ active: true }));
-        return dispatch(startTimerAndAnimation(draw, timerStartedFrom, total));
+        return dispatch(startTimerAnimation(draw, timerStartedFrom, total));
     });
 };
 
-export const skipInterval = (resetAnimation: () => void) => (
+export const skipInterval = (
+    intervalId: NodeJS.Timer,
+    resetAnimation: () => void
+) => (
     dispatch: AppDispatch,
     getState: () => RootState
 ): Promise<number | null> => {
@@ -31,7 +33,7 @@ export const skipInterval = (resetAnimation: () => void) => (
     // if the timer is not active (timer paused or at not started),
     // run the steps to go to the next interval
     // dispatch of this action resolves `0` for the component to track elapsed timer time when timer is not active
-    // otherwise when the timer is active, it resolves `null` as the `animationCb` in `startTimerAndAnimation` will
+    // otherwise when the timer is active, it resolves `null` as the `animationCb` in `startTimerAnimation` will
     // return the `0` for elapsed timer time. in this case the component doesn't need to store the elapsed time as
     // when the promise in `animationCb` resolves, it will resolve with `0` anyway
     // if user does not confirm the action, `null` is resolved
@@ -42,7 +44,11 @@ export const skipInterval = (resetAnimation: () => void) => (
     }
 
     if (getState().timer.active) {
-        dispatch(setToSkipInterval());
+        batch(() => {
+            dispatch(setToSkipInterval());
+            dispatch(nextInterval());
+            dispatch(stopTimer(intervalId));
+        });
         return Promise.resolve(null);
     } else {
         dispatch(nextInterval());
@@ -51,7 +57,10 @@ export const skipInterval = (resetAnimation: () => void) => (
     }
 };
 
-export const startResetInterval = (resetAnimation: () => void) => (
+export const startResetInterval = (
+    intervalId: NodeJS.Timer,
+    resetAnimation: () => void
+) => (
     dispatch: AppDispatch,
     getState: () => RootState
 ): Promise<number | null> => {
@@ -59,7 +68,7 @@ export const startResetInterval = (resetAnimation: () => void) => (
     // if the timer is not active (timer paused or at not started),
     // run the steps to reset the interval
     // dispatch of this action resolves `0` for the component to track elapsed timer time when timer is not active
-    // otherwise when the timer is active, it resolves `null` as the `animationCb` in `startTimerAndAnimation` will
+    // otherwise when the timer is active, it resolves `null` as the `animationCb` in `startTimerAnimation` will
     // return the `0` for elapsed timer time. in this case the component doesn't need to store the elapsed time as
     // when the promise in `animationCb` resolves, it will resolve with `0` anyway
     // if user does not confirm the action, `null` is resolved
@@ -70,7 +79,11 @@ export const startResetInterval = (resetAnimation: () => void) => (
     }
 
     if (getState().timer.active) {
-        dispatch(setToResetInterval());
+        batch(() => {
+            dispatch(setToResetInterval());
+            dispatch(resetInterval());
+            dispatch(stopTimer(intervalId));
+        });
         return Promise.resolve(null);
     } else {
         dispatch(resetInterval());
@@ -79,7 +92,8 @@ export const startResetInterval = (resetAnimation: () => void) => (
     }
 };
 
-export const startTimerAndAnimation = (
+// TODO: see if this can be converted into a hook as there is no dispatch of actions happening and is view only logic now
+export const startTimerAnimation = (
     draw: (elapsedMs: number) => void,
     timerStartedFrom: number,
     total: number
@@ -95,7 +109,6 @@ export const startTimerAndAnimation = (
 
             // if the state is set to skip the interval
             if (state.timer.skip) {
-                dispatch(nextInterval());
                 // reset the progress animation
                 draw(0);
                 // resolve `0` b/c timer is reset
@@ -105,7 +118,6 @@ export const startTimerAndAnimation = (
 
             // if the state is set to reset the interval
             if (state.timer.reset) {
-                dispatch(resetInterval());
                 // reset the progress animation
                 draw(0);
                 // resolve `0` b/c timer is reset
@@ -120,20 +132,12 @@ export const startTimerAndAnimation = (
             // draw the animation for elapsed time
             // `time - startTime` is the elapsed time
             // elapsed time + `timerStartedFrom` takes into account the previously elapsed time of the timer
-            draw(time - startTime + timerStartedFrom);
+            const timeElapsed = time - startTime + timerStartedFrom;
+            draw(timeElapsed);
 
-            // if a second has passed since the last time in state, increment the time in state
-            if (
-                time - startTime + timerStartedFrom >=
-                state.timer.time + 1000
-            ) {
-                dispatch(increment());
-            }
-
-            // deactivate the timer and reset the time when timer completes
+            // when timer completes, reset the time
             // use `getState()` to get the latest state
-            if (getState().timer.time >= total) {
-                dispatch(nextInterval());
+            if (timeElapsed >= total) {
                 // reset the progress animation
                 draw(0);
                 // resolve `0` b/c timer is reset
@@ -154,4 +158,31 @@ export const startTimerAndAnimation = (
 
         requestAnimationFrame(animationCb);
     });
+};
+
+export const startTimer = (total: number, onComplete: () => void) => (
+    dispatch: AppDispatch,
+    getState: () => RootState
+) => {
+    const id = setInterval(() => {
+        dispatch(increment());
+
+        if (getState().timer.time >= total) {
+            batch(() => {
+                dispatch(nextInterval());
+                dispatch(stopTimer(id));
+            });
+            onComplete();
+            return;
+        }
+    }, 1000);
+
+    return id;
+};
+
+export const stopTimer = (intervalId: NodeJS.Timer) => (
+    dispatch: AppDispatch,
+    getState: () => RootState
+) => {
+    clearInterval(intervalId);
 };
