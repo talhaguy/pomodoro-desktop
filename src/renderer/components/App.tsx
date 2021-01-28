@@ -2,7 +2,11 @@ import React, { useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
-import { IntervalType, INTERVAL_LENGTH } from "../interval";
+import {
+    CurrentIntervalData,
+    IntervalType,
+    INTERVAL_LENGTH,
+} from "../interval";
 import { GlobalStyle } from "../style";
 import { Timer } from "./Timer";
 import {
@@ -17,6 +21,7 @@ import {
 } from "../store";
 import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
 import { useSetTimerNotification } from "./useSetTimerNotification";
+import { saveFocusIntervalEndData } from "../store/thunks";
 
 const AppScreenMainContents = styled.main`
     height: 100vh;
@@ -38,6 +43,7 @@ const IntervalGlobalStyle = createGlobalStyle<{ intervalType: IntervalType }>`
 export function App() {
     const timerState = useSelector(selectTimer);
     const dispatch = useDispatch<AppDispatch>();
+    console.log("stated updated...", timerState.numFocusIntervalsCompleted);
 
     useSetTimerNotification(
         timerState.time,
@@ -52,7 +58,22 @@ export function App() {
     // store interval id
     const intervalIdRef = useRef<NodeJS.Timer>();
 
+    // store if we are in the middle of an interval
+    const isIntervalStartedRef = useRef(false);
+
     const TOTAL = INTERVAL_LENGTH[timerState.intervalType];
+
+    // store current interval data
+    const currentIntervalDataRef = useRef<CurrentIntervalData>({
+        startTime: null,
+        endTime: null,
+        intervalDuration: TOTAL,
+        didSkip: false,
+        numTimesPaused: 0,
+        numTimesReset: 0,
+        intervalType: timerState.intervalType,
+    });
+    // TODO: useEffect to update currentIntervalDataRef with timerState.intervalType as dep
 
     const WIDTH = 240;
     const HEIGHT = 240;
@@ -68,6 +89,7 @@ export function App() {
         if (timerState.active) {
             dispatch(deactivateTimer());
             dispatch(stopTimer(intervalIdRef.current));
+            currentIntervalDataRef.current.numTimesPaused += 1;
         } else {
             dispatch(activateTimer(draw, timerMsStoppedAt.current, TOTAL)).then(
                 (endTimeMs) => {
@@ -78,8 +100,26 @@ export function App() {
             intervalIdRef.current = dispatch(
                 startTimer(TOTAL, () => {
                     // TODO: see if notitification can be fired here
+
+                    isIntervalStartedRef.current = false;
+
+                    currentIntervalDataRef.current.endTime = Date.now();
+
+                    dispatch(
+                        saveFocusIntervalEndData(currentIntervalDataRef.current)
+                    );
                 })
             );
+
+            // update focus interval start time only if this is a new interval being started
+            if (
+                !isIntervalStartedRef.current &&
+                timerState.intervalType === IntervalType.Focus
+            ) {
+                console.log("setting start time...", Date.now());
+                currentIntervalDataRef.current.startTime = Date.now();
+                isIntervalStartedRef.current = true;
+            }
         }
     };
 
@@ -92,6 +132,11 @@ export function App() {
             if (endTimeMs !== null) {
                 timerMsStoppedAt.current = endTimeMs;
             }
+
+            isIntervalStartedRef.current = false;
+            currentIntervalDataRef.current.didSkip = true;
+
+            dispatch(saveFocusIntervalEndData(currentIntervalDataRef.current));
         });
     };
 
@@ -104,6 +149,8 @@ export function App() {
             if (endTimeMs !== null) {
                 timerMsStoppedAt.current = endTimeMs;
             }
+
+            isIntervalStartedRef.current = false;
         });
     };
 
