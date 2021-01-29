@@ -47,12 +47,12 @@ export const skipInterval = (
     if (getState().timer.active) {
         batch(() => {
             dispatch(setToSkipInterval());
-            dispatch(nextInterval());
+            dispatch(nextInterval({ didSkip: true }));
             dispatch(stopTimer(intervalId));
         });
         return Promise.resolve(null);
     } else {
-        dispatch(nextInterval());
+        dispatch(nextInterval({ didSkip: true }));
         resetAnimation();
         return Promise.resolve(0);
     }
@@ -138,7 +138,8 @@ export const startTimerAnimation = (
 
             // when timer completes, reset the time
             // use `getState()` to get the latest state
-            if (timeElapsed >= total) {
+            // also, round timeElapsed b/c there are times where it is just a few decimal points off
+            if (Math.round(timeElapsed) >= total) {
                 // reset the progress animation
                 draw(0);
                 // resolve `0` b/c timer is reset
@@ -170,7 +171,7 @@ export const startTimer = (total: number, onComplete: () => void) => (
 
         if (getState().timer.time >= total) {
             batch(() => {
-                dispatch(nextInterval());
+                dispatch(nextInterval({ didSkip: false }));
                 dispatch(stopTimer(id));
             });
             onComplete();

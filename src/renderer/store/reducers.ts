@@ -49,7 +49,10 @@ export function resetInterval(state: TimerState) {
     state.time = 0;
 }
 
-export function nextInterval(state: TimerState) {
+export function nextInterval(
+    state: TimerState,
+    action: PayloadAction<{ didSkip: boolean }>
+) {
     // does not stop the actual timer
     // just sets the state values
     state.active = false;
@@ -57,7 +60,7 @@ export function nextInterval(state: TimerState) {
 
     switch (state.intervalType) {
         case IntervalType.Focus:
-            state.numFocusIntervalsCompleted += 1;
+            if (!action.payload.didSkip) state.numFocusIntervalsCompleted += 1;
 
             if (
                 state.numFocusIntervalsCompleted %

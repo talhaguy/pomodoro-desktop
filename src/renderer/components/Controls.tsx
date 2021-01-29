@@ -5,6 +5,7 @@ import { ControlButton, ControlButtonType } from "./ControlButton";
 const StyledControlButtons = styled.div`
     display: flex;
     justify-content: center;
+    margin-bottom: ${(props) => props.theme.SPACING.SECTION_MARGIN};
 
     button + button {
         margin-left: 10px;

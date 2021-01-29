@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
@@ -22,6 +22,7 @@ import {
 import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
 import { useSetTimerNotification } from "./useSetTimerNotification";
 import { saveFocusIntervalEndData } from "../store/thunks";
+import { IntervalCounter } from "./IntervalCounter";
 
 const AppScreenMainContents = styled.main`
     height: 100vh;
@@ -174,6 +175,12 @@ export function App() {
                     toggleTimer={toggleTimer}
                     skipInterval={skipIntervalCb}
                     resetInterval={resetIntervalCb}
+                />
+
+                <IntervalCounter
+                    numIntervalsCompleted={
+                        timerState.numFocusIntervalsCompleted
+                    }
                 />
             </AppScreenMainContents>
         </>
