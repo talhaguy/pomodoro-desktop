@@ -9,7 +9,7 @@ const Container = styled.div<{ bottom: number; isVisible: boolean }>`
     background-color: ${(props) => props.theme.COLORS.WHITE};
     color: ${(props) => props.theme.COLORS.BLACK};
     padding: 20px 40px;
-    font-size: 1.2rem;
+    font-size: 1.4rem;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.25);
     border-radius: 3px;
     opacity: ${(props) => (props.isVisible ? "1" : "0")};

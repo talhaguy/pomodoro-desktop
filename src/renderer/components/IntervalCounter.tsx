@@ -82,12 +82,21 @@ export function IntervalCounter({
                 }
             >
                 {renderCircles()}
-                {numIntervalsCompleted > 0 && (
-                    <Tooltip bottom={-70} isVisible={showTooltip}>
-                        <span className="bold">{numIntervalsCompleted}</span>{" "}
-                        {LOCALIZATION["intervalCounter.intervalsCompleted"]}
-                    </Tooltip>
-                )}
+                <div
+                    onMouseOver={(e) => {
+                        // prevent hover over on this invisible tooltip triggering it to be visible
+                        e.stopPropagation();
+                    }}
+                >
+                    {numIntervalsCompleted > 0 && (
+                        <Tooltip bottom={-80} isVisible={showTooltip}>
+                            <span className="bold">
+                                {numIntervalsCompleted}
+                            </span>{" "}
+                            {LOCALIZATION["intervalCounter.intervalsCompleted"]}
+                        </Tooltip>
+                    )}
+                </div>
             </Container>
         </>
     );
