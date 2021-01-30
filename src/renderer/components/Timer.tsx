@@ -1,7 +1,7 @@
 import React, { MutableRefObject } from "react";
 import styled from "styled-components";
 import { Clock } from "./Clock";
-import { IntervalType } from "../interval";
+import { IntervalType } from "../../shared";
 import { ProgressCircle } from "./ProgressCircle";
 import { LOCALIZATION } from "../localization";
 

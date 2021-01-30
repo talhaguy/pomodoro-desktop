@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import styled, { createGlobalStyle } from "styled-components";
 import { Controls } from "./Controls";
@@ -6,7 +6,7 @@ import {
     CurrentIntervalData,
     IntervalType,
     INTERVAL_LENGTH,
-} from "../interval";
+} from "../../shared";
 import { GlobalStyle } from "../style";
 import { Timer } from "./Timer";
 import {
@@ -18,10 +18,11 @@ import {
     startResetInterval,
     startTimer,
     stopTimer,
+    saveFocusIntervalEndData,
+    retrieveSavedIntervalData,
 } from "../store";
 import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
 import { useSetTimerNotification } from "./useSetTimerNotification";
-import { saveFocusIntervalEndData } from "../store/thunks";
 import { IntervalCounter } from "./IntervalCounter";
 
 const AppScreenMainContents = styled.main`
@@ -64,6 +65,16 @@ export function App() {
 
     const TOTAL = INTERVAL_LENGTH[timerState.intervalType];
 
+    const WIDTH = 240;
+    const HEIGHT = 240;
+
+    const [canvasRef, draw] = useRenderProgressCircleInCanvas(
+        WIDTH,
+        HEIGHT,
+        WIDTH - 10,
+        TOTAL
+    );
+
     // store current interval data
     const currentIntervalDataRef = useRef<CurrentIntervalData>({
         startTime: null,
@@ -74,17 +85,25 @@ export function App() {
         numTimesReset: 0,
         intervalType: timerState.intervalType,
     });
-    // TODO: useEffect to update currentIntervalDataRef with timerState.intervalType as dep
 
-    const WIDTH = 240;
-    const HEIGHT = 240;
+    useEffect(() => {
+        console.log("use effect for updating current interval");
+        currentIntervalDataRef.current = {
+            startTime: null,
+            endTime: null,
+            intervalDuration: TOTAL,
+            didSkip: false,
+            numTimesPaused: 0,
+            numTimesReset: 0,
+            intervalType: timerState.intervalType,
+        };
+        console.log(currentIntervalDataRef.current);
+    }, [timerState.intervalType]);
 
-    const [canvasRef, draw] = useRenderProgressCircleInCanvas(
-        WIDTH,
-        HEIGHT,
-        WIDTH - 10,
-        TOTAL
-    );
+    // get saved data if there is any and set the state
+    useEffect(() => {
+        dispatch(retrieveSavedIntervalData());
+    }, []);
 
     const toggleTimer = () => {
         if (timerState.active) {
@@ -112,12 +131,8 @@ export function App() {
                 })
             );
 
-            // update focus interval start time only if this is a new interval being started
-            if (
-                !isIntervalStartedRef.current &&
-                timerState.intervalType === IntervalType.Focus
-            ) {
-                console.log("setting start time...", Date.now());
+            // update interval start time only if this is a new interval being started
+            if (!isIntervalStartedRef.current) {
                 currentIntervalDataRef.current.startTime = Date.now();
                 isIntervalStartedRef.current = true;
             }
@@ -151,6 +166,7 @@ export function App() {
                 timerMsStoppedAt.current = endTimeMs;
             }
 
+            currentIntervalDataRef.current.numTimesReset += 1;
             isIntervalStartedRef.current = false;
         });
     };

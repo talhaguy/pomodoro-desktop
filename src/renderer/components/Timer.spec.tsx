@@ -3,7 +3,7 @@ import { cleanup, render, screen } from "@testing-library/react";
 import { ThemeProvider } from "styled-components";
 import { THEME } from "../style";
 import { Timer } from "./Timer";
-import { IntervalType } from "../interval";
+import { IntervalType } from "../../shared";
 import { LOCALIZATION } from "../localization";
 
 describe("Timer", () => {

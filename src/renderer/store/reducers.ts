@@ -1,8 +1,9 @@
 import { PayloadAction } from "@reduxjs/toolkit";
 import {
+    CurrentIntervalData,
     IntervalType,
     NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK,
-} from "../interval";
+} from "../../shared";
 import { TimerState } from "./timerSlice";
 
 export function increment(state: TimerState) {
@@ -57,25 +58,50 @@ export function nextInterval(
     // just sets the state values
     state.active = false;
     state.time = 0;
+    if (state.intervalType === IntervalType.Focus && !action.payload.didSkip)
+        state.numFocusIntervalsCompleted += 1;
+    state.intervalType = getNextInterval(
+        state.numFocusIntervalsCompleted,
+        state.intervalType
+    );
+}
 
-    switch (state.intervalType) {
+function getNextInterval(
+    numFocusIntervalsCompleted: number,
+    currentInterval: IntervalType
+) {
+    switch (currentInterval) {
         case IntervalType.Focus:
-            if (!action.payload.didSkip) state.numFocusIntervalsCompleted += 1;
-
             if (
-                state.numFocusIntervalsCompleted %
+                numFocusIntervalsCompleted !== 0 &&
+                numFocusIntervalsCompleted %
                     NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK ===
-                0
+                    0
             ) {
-                state.intervalType = IntervalType.LongBreak;
+                return IntervalType.LongBreak;
             } else {
-                state.intervalType = IntervalType.ShortBreak;
+                return IntervalType.ShortBreak;
             }
-            break;
 
         case IntervalType.ShortBreak:
         case IntervalType.LongBreak:
-            state.intervalType = IntervalType.Focus;
-            break;
+            return IntervalType.Focus;
+    }
+}
+
+export function updateStateFromSavedData(
+    state: TimerState,
+    action: PayloadAction<{ savedData: CurrentIntervalData[] }>
+) {
+    const savedData = action.payload.savedData;
+    if (savedData.length > 0) {
+        state.numFocusIntervalsCompleted = savedData.filter(
+            (data) => data.intervalType === IntervalType.Focus
+        ).length;
+
+        state.intervalType = getNextInterval(
+            state.numFocusIntervalsCompleted,
+            savedData[savedData.length - 1].intervalType
+        );
     }
 }

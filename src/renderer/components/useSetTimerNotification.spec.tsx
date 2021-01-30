@@ -1,6 +1,6 @@
 import React from "react";
 import { cleanup, render } from "@testing-library/react";
-import { IntervalType } from "../interval";
+import { IntervalType } from "../../shared";
 import { useSetTimerNotification } from "./useSetTimerNotification";
 
 describe("useSetTimerNotification()", () => {

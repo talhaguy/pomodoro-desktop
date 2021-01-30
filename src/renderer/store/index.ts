@@ -7,6 +7,8 @@ export {
     startTimerAnimation,
     startTimer,
     stopTimer,
+    saveFocusIntervalEndData,
+    retrieveSavedIntervalData,
 } from "./thunks";
 
 export {

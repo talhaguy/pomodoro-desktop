@@ -1,4 +1,4 @@
-import { IntervalType } from "../interval";
+import { IntervalType } from "../../shared";
 import { RootState } from "./store";
 import { startTimer, startTimerAnimation } from "./thunks";
 

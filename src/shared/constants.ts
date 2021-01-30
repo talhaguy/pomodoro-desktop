@@ -1,4 +1,8 @@
-import { Environment } from "../../shared";
+export enum Environment {
+    Dev = "dev",
+    Prod = "prod",
+    Test = "test",
+}
 
 export enum IntervalType {
     Focus = "Focus",

@@ -1,4 +1,4 @@
-import { IntervalType } from "../interval";
+import { IntervalType } from "../../shared";
 import {
     deactivateTimer,
     increment,
@@ -84,27 +84,47 @@ describe("reducers", () => {
             state.time = 10000;
             state.active = true;
 
-            nextInterval(state);
+            const nonSkipActionPayload = {
+                payload: {
+                    didSkip: false,
+                },
+                type: "nextInterval",
+            };
+
+            nextInterval(state, nonSkipActionPayload);
             expect(state.time).toBe(0);
             expect(state.active).toBeFalsy();
             expect(state.intervalType).toBe(IntervalType.ShortBreak);
 
-            nextInterval(state);
+            nextInterval(state, nonSkipActionPayload);
             expect(state.intervalType).toBe(IntervalType.Focus);
 
-            nextInterval(state);
+            nextInterval(state, nonSkipActionPayload);
             expect(state.intervalType).toBe(IntervalType.ShortBreak);
 
-            nextInterval(state);
+            nextInterval(state, nonSkipActionPayload);
             expect(state.intervalType).toBe(IntervalType.Focus);
 
-            nextInterval(state);
+            nextInterval(state, nonSkipActionPayload);
             expect(state.intervalType).toBe(IntervalType.LongBreak);
 
-            nextInterval(state);
+            nextInterval(state, nonSkipActionPayload);
             expect(state.intervalType).toBe(IntervalType.Focus);
 
-            nextInterval(state);
+            nextInterval(state, nonSkipActionPayload);
+            expect(state.intervalType).toBe(IntervalType.ShortBreak);
+        });
+
+        it("should set the interval to the correct next interval if no intervals are completed and current interval is skipped", () => {
+            state.time = 10000;
+            state.active = false;
+
+            nextInterval(state, {
+                payload: {
+                    didSkip: true,
+                },
+                type: "nextInterval",
+            });
             expect(state.intervalType).toBe(IntervalType.ShortBreak);
         });
     });

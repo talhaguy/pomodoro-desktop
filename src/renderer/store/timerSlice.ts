@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IntervalType } from "../interval";
+import { IntervalType } from "../../shared";
 import { RootState } from "./store";
 import {
     increment as incrementReducer,
@@ -9,6 +9,7 @@ import {
     setToResetInterval as setToResetIntervalReducer,
     resetInterval as resetIntervalReducer,
     nextInterval as nextIntervalReducer,
+    updateStateFromSavedData as updateStateFromSavedDataReducer,
 } from "./reducers";
 
 export interface TimerState {
@@ -40,6 +41,7 @@ export const timerSlice = createSlice({
         setToResetInterval: setToResetIntervalReducer,
         resetInterval: resetIntervalReducer,
         nextInterval: nextIntervalReducer,
+        updateStateFromSavedData: updateStateFromSavedDataReducer,
     },
 });
 
@@ -51,6 +53,7 @@ export const {
     setToResetInterval,
     resetInterval,
     nextInterval,
+    updateStateFromSavedData,
 } = timerSlice.actions;
 
 export const selectTimer = (state: RootState) => state.timer;

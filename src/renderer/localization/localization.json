@@ -7,5 +7,5 @@
     "notification.intervalComplete.body.break": "Break time's over! It's time to focus.",
     "timer.confirm.reset": "Are you sure you want to reset this interval?",
     "timer.confirm.skip": "Are you sure you want to skip this interval?",
-    "intervalCounter.intervalsCompleted": "interval(s) completed"
+    "intervalCounter.intervalsCompleted": "focus interval(s) completed"
 }

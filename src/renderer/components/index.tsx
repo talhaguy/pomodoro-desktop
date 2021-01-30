@@ -1,6 +1,7 @@
 import React from "react";
 import { Provider } from "react-redux";
 import { ThemeProvider } from "styled-components";
+import { getSavedIntervalData, saveIntervalData } from "../data";
 import { store } from "../store";
 import { THEME } from "../style";
 import { App } from "./App";

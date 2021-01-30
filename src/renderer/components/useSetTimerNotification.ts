@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { IntervalType, INTERVAL_LENGTH } from "../interval";
+import { IntervalType, INTERVAL_LENGTH } from "../../shared";
 import { LOCALIZATION } from "../localization";
 
 export function useSetTimerNotification(

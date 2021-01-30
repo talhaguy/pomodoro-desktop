@@ -1,5 +1,6 @@
 import { batch } from "react-redux";
-import { CurrentIntervalData } from "../interval";
+import { CurrentIntervalData } from "../../shared";
+import { getSavedIntervalData, saveIntervalData } from "../data";
 import { LOCALIZATION } from "../localization";
 import { batchPromise } from "./batchPromise";
 import { AppDispatch, RootState } from "./store";
@@ -10,6 +11,7 @@ import {
     setToResetInterval,
     resetInterval,
     nextInterval,
+    updateStateFromSavedData,
 } from "./timerSlice";
 
 export const activateTimer = (
@@ -192,8 +194,18 @@ export const stopTimer = (intervalId: NodeJS.Timer) => (
 export const saveFocusIntervalEndData = (
     currentIntervalData: CurrentIntervalData
 ) => (dispatch: AppDispatch, getState: () => RootState) => {
-    // TODO: stub for when data will be persisted
-    console.log("started: " + new Date(currentIntervalData.startTime));
-    console.log("ended: " + new Date(currentIntervalData.endTime));
-    return Promise.resolve();
+    return saveIntervalData(currentIntervalData);
+};
+
+export const retrieveSavedIntervalData = () => (
+    dispatch: AppDispatch,
+    getState: () => RootState
+) => {
+    getSavedIntervalData().then((savedData) => {
+        dispatch(
+            updateStateFromSavedData({
+                savedData,
+            })
+        );
+    });
 };

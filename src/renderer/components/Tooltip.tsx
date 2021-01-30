@@ -14,7 +14,7 @@ const Container = styled.div<{ bottom: number; isVisible: boolean }>`
     border-radius: 3px;
     opacity: ${(props) => (props.isVisible ? "1" : "0")};
     transition: opacity 200ms;
-    min-width: 150px;
+    min-width: 180px;
     text-align: center;
 
     &::before {
