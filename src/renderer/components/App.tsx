@@ -20,10 +20,12 @@ import {
     stopTimer,
     saveFocusIntervalEndData,
     retrieveSavedIntervalData,
+    deleteAllSavedData,
 } from "../store";
 import { useRenderProgressCircleInCanvas } from "./useRenderProgressCircleInCanvas";
 import { useSetTimerNotification } from "./useSetTimerNotification";
 import { IntervalCounter } from "./IntervalCounter";
+import { DeleteButton } from "./DeleteButton";
 
 const AppScreenMainContents = styled.main`
     height: 100vh;
@@ -45,7 +47,6 @@ const IntervalGlobalStyle = createGlobalStyle<{ intervalType: IntervalType }>`
 export function App() {
     const timerState = useSelector(selectTimer);
     const dispatch = useDispatch<AppDispatch>();
-    console.log("stated updated...", timerState.numFocusIntervalsCompleted);
 
     useSetTimerNotification(
         timerState.time,
@@ -76,18 +77,18 @@ export function App() {
     );
 
     // store current interval data
-    const currentIntervalDataRef = useRef<CurrentIntervalData>({
-        startTime: null,
-        endTime: null,
-        intervalDuration: TOTAL,
-        didSkip: false,
-        numTimesPaused: 0,
-        numTimesReset: 0,
-        intervalType: timerState.intervalType,
-    });
+    const currentIntervalDataRef = useRef<CurrentIntervalData>();
 
     useEffect(() => {
-        console.log("use effect for updating current interval");
+        resetCurrentIntervalData();
+    }, [timerState.intervalType]);
+
+    // get saved data if there is any and set the state
+    useEffect(() => {
+        dispatch(retrieveSavedIntervalData());
+    }, []);
+
+    const resetCurrentIntervalData = () => {
         currentIntervalDataRef.current = {
             startTime: null,
             endTime: null,
@@ -97,13 +98,7 @@ export function App() {
             numTimesReset: 0,
             intervalType: timerState.intervalType,
         };
-        console.log(currentIntervalDataRef.current);
-    }, [timerState.intervalType]);
-
-    // get saved data if there is any and set the state
-    useEffect(() => {
-        dispatch(retrieveSavedIntervalData());
-    }, []);
+    };
 
     const toggleTimer = () => {
         if (timerState.active) {
@@ -171,6 +166,16 @@ export function App() {
         });
     };
 
+    const resetData = () => {
+        dispatch(deleteAllSavedData(intervalIdRef.current));
+        isIntervalStartedRef.current = false;
+        resetCurrentIntervalData();
+        requestAnimationFrame(() => {
+            draw(0);
+            timerMsStoppedAt.current = 0;
+        });
+    };
+
     return (
         <>
             <GlobalStyle />
@@ -199,6 +204,8 @@ export function App() {
                     }
                 />
             </AppScreenMainContents>
+
+            <DeleteButton onClick={resetData} />
         </>
     );
 }

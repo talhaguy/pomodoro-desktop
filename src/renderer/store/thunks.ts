@@ -1,6 +1,10 @@
 import { batch } from "react-redux";
 import { CurrentIntervalData } from "../../shared";
-import { getSavedIntervalData, saveIntervalData } from "../data";
+import {
+    getSavedIntervalData,
+    saveIntervalData,
+    deleteIntervalData,
+} from "../data";
 import { LOCALIZATION } from "../localization";
 import { batchPromise } from "./batchPromise";
 import { AppDispatch, RootState } from "./store";
@@ -12,6 +16,7 @@ import {
     resetInterval,
     nextInterval,
     updateStateFromSavedData,
+    resetToInitialState,
 } from "./timerSlice";
 
 export const activateTimer = (
@@ -208,4 +213,18 @@ export const retrieveSavedIntervalData = () => (
             })
         );
     });
+};
+
+export const deleteAllSavedData = (intervalId: NodeJS.Timer) => (
+    dispatch: AppDispatch,
+    getState: () => RootState
+) => {
+    const shouldDelete = confirm(
+        LOCALIZATION["intervalCounter.confirm.delete"]
+    );
+    if (shouldDelete) {
+        deleteIntervalData();
+        dispatch(stopTimer(intervalId));
+        dispatch(resetToInitialState());
+    }
 };

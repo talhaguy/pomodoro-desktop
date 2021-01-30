@@ -4,7 +4,7 @@ import {
     IntervalType,
     NUM_FOCUS_INTERVALS_TO_COMPLETE_FOR_LONG_BREAK,
 } from "../../shared";
-import { TimerState } from "./timerSlice";
+import { getTimerInitialState, TimerState } from "./timerSlice";
 
 export function increment(state: TimerState) {
     state.time += 1000;
@@ -103,5 +103,12 @@ export function updateStateFromSavedData(
             state.numFocusIntervalsCompleted,
             savedData[savedData.length - 1].intervalType
         );
+    }
+}
+
+export function resetToInitialState(state: TimerState) {
+    const initialState = getTimerInitialState();
+    for (const key in initialState) {
+        state[key] = initialState[key];
     }
 }

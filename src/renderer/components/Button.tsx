@@ -19,9 +19,18 @@ const StyledButton = styled.button`
 
 interface ButtonProps {
     onClick: () => void;
+    ariaLabel: string;
     children: ReactNode;
 }
 
-export const Button: React.FC<ButtonProps> = ({ onClick, children }) => {
-    return <StyledButton onClick={onClick}>{children}</StyledButton>;
+export const Button: React.FC<ButtonProps> = ({
+    onClick,
+    ariaLabel,
+    children,
+}) => {
+    return (
+        <StyledButton onClick={onClick} aria-label={ariaLabel}>
+            {children}
+        </StyledButton>
+    );
 };

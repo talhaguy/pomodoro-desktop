@@ -6,6 +6,12 @@
     "notification.intervalComplete.body.focus": "Great work! It's time to take a break.",
     "notification.intervalComplete.body.break": "Break time's over! It's time to focus.",
     "timer.confirm.reset": "Are you sure you want to reset this interval?",
+    "controls.start": "Start",
+    "controls.pause": "Pause",
+    "controls.skip": "Skip",
+    "controls.restart": "Restart",
     "timer.confirm.skip": "Are you sure you want to skip this interval?",
-    "intervalCounter.intervalsCompleted": "focus interval(s) completed"
+    "intervalCounter.intervalsCompleted": "focus interval(s) completed",
+    "intervalCounter.confirm.delete": "Are you sure you want to delete intervals tracked?",
+    "intervalCounter.delete": "Delete"
 }

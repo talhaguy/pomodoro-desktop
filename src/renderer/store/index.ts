@@ -9,6 +9,7 @@ export {
     stopTimer,
     saveFocusIntervalEndData,
     retrieveSavedIntervalData,
+    deleteAllSavedData,
 } from "./thunks";
 
 export {

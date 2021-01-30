@@ -10,6 +10,7 @@ import {
     resetInterval as resetIntervalReducer,
     nextInterval as nextIntervalReducer,
     updateStateFromSavedData as updateStateFromSavedDataReducer,
+    resetToInitialState as resetToInitialStateReducer,
 } from "./reducers";
 
 export interface TimerState {
@@ -21,18 +22,18 @@ export interface TimerState {
     reset: boolean;
 }
 
-const initialState: TimerState = {
+export const getTimerInitialState: () => TimerState = () => ({
     time: 0,
     active: false,
     intervalType: IntervalType.Focus,
     numFocusIntervalsCompleted: 0,
     skip: false,
     reset: false,
-};
+});
 
 export const timerSlice = createSlice({
     name: "timer",
-    initialState,
+    initialState: getTimerInitialState(),
     reducers: {
         increment: incrementReducer,
         setActivate: setActivateReducer,
@@ -42,6 +43,7 @@ export const timerSlice = createSlice({
         resetInterval: resetIntervalReducer,
         nextInterval: nextIntervalReducer,
         updateStateFromSavedData: updateStateFromSavedDataReducer,
+        resetToInitialState: resetToInitialStateReducer,
     },
 });
 
@@ -54,6 +56,7 @@ export const {
     resetInterval,
     nextInterval,
     updateStateFromSavedData,
+    resetToInitialState,
 } = timerSlice.actions;
 
 export const selectTimer = (state: RootState) => state.timer;

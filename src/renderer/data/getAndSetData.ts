@@ -41,3 +41,7 @@ export function getSavedIntervalData(storage: Storage) {
         return Promise.reject();
     }
 }
+
+export function deleteIntervalData(storage: Storage) {
+    storage.removeItem(SAVED_DATA_KEY);
+}
